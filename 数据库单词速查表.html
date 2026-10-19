@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <style>
+@page {
+    size: A4;
+    margin: 25mm 20mm 20mm 20mm;
+
+    @top-center {
+        content: "数据库SQL单词速查表  |  横纵分析法深度研究报告";
+        font-family: "Droid Sans Fallback", Helvetica, Arial, sans-serif;
+        font-size: 8pt;
+        color: #95a5a6;
+        border-bottom: 0.5pt solid #ecf0f1;
+        padding-bottom: 3mm;
+    }
+
+    @bottom-center {
+        content: "第 " counter(page) " 页";
+        font-family: "Droid Sans Fallback", Helvetica, Arial, sans-serif;
+        font-size: 8pt;
+        color: #95a5a6;
+        border-top: 0.8pt solid #1a5276;
+        padding-top: 2mm;
+    }
+}
+
+@page :first {
+    @top-center { content: none; }
+    @bottom-center { content: none; }
+}
+
+body {
+    font-family: "Droid Sans Fallback", Helvetica, Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.75;
+    color: #2c3e50;
+    text-align: justify;
+}
+
+/* 封面 */
+.cover {
+    page-break-after: always;
+    text-align: center;
+    padding-top: 45%;
+}
+.cover h1 {
+    font-size: 28pt;
+    color: #1a5276;
+    margin-bottom: 8mm;
+    font-weight: bold;
+    letter-spacing: 2pt;
+}
+.cover .subtitle {
+    font-size: 14pt;
+    color: #95a5a6;
+    margin-bottom: 6mm;
+}
+.cover .meta {
+    font-size: 11pt;
+    color: #95a5a6;
+    margin-bottom: 4mm;
+}
+.cover .divider {
+    width: 60%;
+    margin: 8mm auto;
+    border: none;
+    border-top: 1.5pt solid #1a5276;
+}
+
+/* 一级标题 */
+h1 {
+    font-size: 20pt;
+    color: #1a5276;
+    margin-top: 16mm;
+    margin-bottom: 6mm;
+    padding-bottom: 3mm;
+    border-bottom: 2pt solid #1a5276;
+    page-break-before: always;
+    font-weight: bold;
+}
+
+/* 二级标题 */
+h2 {
+    font-size: 14pt;
+    color: #1e8449;
+    margin-top: 10mm;
+    margin-bottom: 5mm;
+    font-weight: bold;
+}
+
+/* 三级标题 */
+h3 {
+    font-size: 12pt;
+    color: #2e86c1;
+    margin-top: 6mm;
+    margin-bottom: 3mm;
+    font-weight: bold;
+}
+
+h4 {
+    font-size: 11pt;
+    color: #5b2c6f;
+    margin-top: 5mm;
+    margin-bottom: 2mm;
+    font-weight: bold;
+}
+
+/* 段落 */
+p {
+    margin-top: 1.5mm;
+    margin-bottom: 1.5mm;
+    orphans: 3;
+    widows: 3;
+}
+
+/* 引用块 */
+blockquote {
+    margin: 4mm 0;
+    padding: 4mm 4mm 4mm 10mm;
+    background: #f8f9fa;
+    border-left: 3pt solid #1a5276;
+    color: #5d6d7e;
+    font-size: 10pt;
+}
+blockquote p {
+    margin: 1mm 0;
+}
+
+/* 粗体 */
+strong, b {
+    font-weight: bold;
+    color: #1a252f;
+}
+
+/* 行内代码 */
+code {
+    font-family: "Courier New", Courier, monospace;
+    background: #fdf2e9;
+    color: #c0392b;
+    padding: 0.5mm 1.5mm;
+    border-radius: 2pt;
+    font-size: 9.5pt;
+}
+
+/* 表格 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 4mm 0;
+    font-size: 9.5pt;
+}
+thead th {
+    background: #1a5276;
+    color: white;
+    padding: 3mm;
+    text-align: left;
+    font-weight: bold;
+}
+tbody td {
+    padding: 2.5mm 3mm;
+    border-bottom: 0.5pt solid #bdc3c7;
+}
+tbody tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+/* 分隔线 */
+hr {
+    border: none;
+    border-top: 0.5pt solid #bdc3c7;
+    margin: 4mm 0;
+}
+
+/* 列表 */
+ul, ol {
+    margin: 2mm 0;
+    padding-left: 8mm;
+}
+li {
+    margin-bottom: 1mm;
+}
+
+/* 链接 */
+a {
+    color: #2e86c1;
+    text-decoration: none;
+}
+</style>
+</head>
+<body>
+
+    <div class="cover">
+        <h1 style="page-break-before: avoid; border: none;">数据库SQL单词速查表</h1>
+        <div class="subtitle">横纵分析法深度研究报告</div>
+        <div class='meta'>研究时间：2026-09-23 | 所属领域：数据库原理与技术 | 用途：考前背诵</div>
+        <hr class="divider">
+        <div class="meta">作者: 白墨</div>
+    </div>
+    
+
+<blockquote>
+<p>研究时间：2026-09-23 | 所属领域：数据库原理与技术 | 用途：考前背诵</p>
+</blockquote>
+<h2>一、建表相关</h2>
+<table>
+<thead>
+<tr>
+<th>单词</th>
+<th>中文</th>
+<th>例句</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>create</td>
+<td>创建</td>
+<td>create table 建表</td>
+</tr>
+<tr>
+<td>table</td>
+<td>表</td>
+<td></td>
+</tr>
+<tr>
+<td>column</td>
+<td>列</td>
+<td></td>
+</tr>
+<tr>
+<td>primary key</td>
+<td>主键</td>
+<td></td>
+</tr>
+<tr>
+<td>foreign key</td>
+<td>外键</td>
+<td></td>
+</tr>
+<tr>
+<td>not null</td>
+<td>非空</td>
+<td></td>
+</tr>
+<tr>
+<td>unique</td>
+<td>唯一的</td>
+<td></td>
+</tr>
+<tr>
+<td>default</td>
+<td>默认值</td>
+<td></td>
+</tr>
+<tr>
+<td>check</td>
+<td>检查（约束）</td>
+<td></td>
+</tr>
+<tr>
+<td>identity</td>
+<td>自动编号</td>
+<td></td>
+</tr>
+<tr>
+<td>drop</td>
+<td>删除（表/库）</td>
+<td>drop table 删表</td>
+</tr>
+<tr>
+<td>alter</td>
+<td>修改（表结构）</td>
+<td>alter table 改表</td>
+</tr>
+<tr>
+<td>add</td>
+<td>增加（列）</td>
+<td></td>
+</tr>
+<tr>
+<td>constraint</td>
+<td>约束</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>二、增删改查</h2>
+<table>
+<thead>
+<tr>
+<th>单词</th>
+<th>中文</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>select</td>
+<td>查询</td>
+</tr>
+<tr>
+<td>from</td>
+<td>从（哪张表）</td>
+</tr>
+<tr>
+<td>where</td>
+<td>在条件下（筛选行）</td>
+</tr>
+<tr>
+<td>insert</td>
+<td>插入</td>
+</tr>
+<tr>
+<td>into</td>
+<td>到（哪张表）</td>
+</tr>
+<tr>
+<td>values</td>
+<td>值</td>
+</tr>
+<tr>
+<td>update</td>
+<td>更新</td>
+</tr>
+<tr>
+<td>set</td>
+<td>设置</td>
+</tr>
+<tr>
+<td>delete</td>
+<td>删除（数据）</td>
+</tr>
+</tbody>
+</table>
+<h2>三、查询进阶</h2>
+<table>
+<thead>
+<tr>
+<th>单词</th>
+<th>中文</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>order by</td>
+<td>排序</td>
+</tr>
+<tr>
+<td>asc</td>
+<td>升序（小到大）</td>
+</tr>
+<tr>
+<td>desc</td>
+<td>降序（大到小）</td>
+</tr>
+<tr>
+<td>group by</td>
+<td>分组</td>
+</tr>
+<tr>
+<td>having</td>
+<td>分组后筛选（筛选组）</td>
+</tr>
+<tr>
+<td>top</td>
+<td>前N条</td>
+</tr>
+<tr>
+<td>distinct</td>
+<td>去重</td>
+</tr>
+<tr>
+<td>like</td>
+<td>模糊匹配</td>
+</tr>
+<tr>
+<td>between</td>
+<td>在之间</td>
+</tr>
+<tr>
+<td>in</td>
+<td>在之中</td>
+</tr>
+<tr>
+<td>and</td>
+<td>并且</td>
+</tr>
+<tr>
+<td>or</td>
+<td>或者</td>
+</tr>
+<tr>
+<td>not</td>
+<td>不是</td>
+</tr>
+<tr>
+<td>join</td>
+<td>连接（多表）</td>
+</tr>
+<tr>
+<td>as</td>
+<td>起别名</td>
+</tr>
+</tbody>
+</table>
+<h2>四、函数相关</h2>
+<table>
+<thead>
+<tr>
+<th>单词</th>
+<th>中文</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>count</td>
+<td>计数</td>
+</tr>
+<tr>
+<td>sum</td>
+<td>求和</td>
+</tr>
+<tr>
+<td>avg</td>
+<td>平均值</td>
+</tr>
+<tr>
+<td>max</td>
+<td>最大值</td>
+</tr>
+<tr>
+<td>min</td>
+<td>最小值</td>
+</tr>
+<tr>
+<td>len</td>
+<td>长度</td>
+</tr>
+<tr>
+<td>year / month / day</td>
+<td>年 / 月 / 日</td>
+</tr>
+<tr>
+<td>getdate</td>
+<td>获取当前时间</td>
+</tr>
+</tbody>
+</table>
+<h2>五、事务与安全</h2>
+<table>
+<thead>
+<tr>
+<th>单词</th>
+<th>中文</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>transaction</td>
+<td>事务</td>
+</tr>
+<tr>
+<td>begin</td>
+<td>开始</td>
+</tr>
+<tr>
+<td>commit</td>
+<td>提交（确认保存）</td>
+</tr>
+<tr>
+<td>rollback</td>
+<td>回滚（撤销）</td>
+</tr>
+<tr>
+<td>grant</td>
+<td>授权</td>
+</tr>
+<tr>
+<td>revoke</td>
+<td>撤销权限</td>
+</tr>
+<tr>
+<td>deny</td>
+<td>拒绝</td>
+</tr>
+</tbody>
+</table>
+<h2>六、最核心15词（必背）</h2>
+<table>
+<thead>
+<tr>
+<th>单词</th>
+<th>中文</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>select</td>
+<td>查询</td>
+</tr>
+<tr>
+<td>from</td>
+<td>从</td>
+</tr>
+<tr>
+<td>where</td>
+<td>条件</td>
+</tr>
+<tr>
+<td>insert</td>
+<td>插入</td>
+</tr>
+<tr>
+<td>into</td>
+<td>到</td>
+</tr>
+<tr>
+<td>values</td>
+<td>值</td>
+</tr>
+<tr>
+<td>update</td>
+<td>更新</td>
+</tr>
+<tr>
+<td>set</td>
+<td>设置</td>
+</tr>
+<tr>
+<td>delete</td>
+<td>删除</td>
+</tr>
+<tr>
+<td>create</td>
+<td>创建</td>
+</tr>
+<tr>
+<td>drop</td>
+<td>删除</td>
+</tr>
+<tr>
+<td>alter</td>
+<td>修改</td>
+</tr>
+<tr>
+<td>table</td>
+<td>表</td>
+</tr>
+<tr>
+<td>primary key</td>
+<td>主键</td>
+</tr>
+<tr>
+<td>and</td>
+<td>并且</td>
+</tr>
+</tbody>
+</table>
+<h2>方法论说明</h2>
+<p>本表基于《数据库原理与技术（SQL Server 2012）》教材及实际操作整理，按功能分组便于记忆。</p>
+</body>
+</html>

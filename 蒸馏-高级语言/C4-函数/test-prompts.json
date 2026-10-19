@@ -1,0 +1,96 @@
+{
+  "unit": "C4-函数",
+  "source_book": "《高级语言程序设计（2017年版）》郑岩",
+  "source_chapter": "ch06",
+  "minimum_pass_rate": 0.8,
+  "triggers": [
+    {
+      "id": "T1-recursion-read",
+      "type": "递归读结果",
+      "prompt": "阅读下列程序，写出输出结果。\n#include <stdio.h>\nint f(int n)\n{\n    if (n == 1) return 1;\n    else return n + f(n - 1);\n}\nint main(void)\n{\n    printf(\"%d\", f(5));\n    return 0;\n}\n要求：用两列栈表（调用层 | 回代求值）写出跟踪过程，再给最终输出。",
+      "answer": "下行：f(5)=5+f(4)，f(4)=4+f(3)，f(3)=3+f(2)，f(2)=2+f(1)，f(1)=1（出口）。\n回代：f(2)=2+1=3；f(3)=3+3=6；f(4)=4+6=10；f(5)=5+10=15。\n输出：15。",
+      "keywords": ["栈表", "出口", "15"]
+    },
+    {
+      "id": "T2-recursion-array",
+      "type": "递归读结果",
+      "prompt": "阅读下列程序，写出输出结果。\n#include <stdio.h>\nint fun(int a[], int n)\n{\n    if (n >= 1)\n        return fun(a, n - 1) + a[n - 1];\n    else\n        return 0;\n}\nint main(void)\n{\n    int x[7] = {1, 2, 3, 4, 5, 6, 7}, s;\n    s = fun(x, 7);\n    printf(\"%d\", s);\n    return 0;\n}",
+      "answer": "fun(a,7)=fun(a,6)+a[6]=fun(a,6)+7；逐层下到 fun(a,0)=0（出口）。回代：fun(a,1)=0+1=1，fun(a,2)=1+2=3，fun(a,3)=6，fun(a,4)=10，fun(a,5)=15，fun(a,6)=21，fun(a,7)=21+7=28。输出：28（即 1~7 之和）。",
+      "keywords": ["28", "出口", "递推"]
+    },
+    {
+      "id": "T3-static-judge",
+      "type": "static 判断",
+      "prompt": "阅读下列程序，写出输出结果，并说明每行输出时 b 和 c 的值从何而来。\n#include <stdio.h>\nint f(int a)\n{\n    int b = 3;\n    static int c = 3;\n    b++;\n    c++;\n    return a + b + c;\n}\nint main(void)\n{\n    int a = 3, i;\n    for (i = 0; i < 3; i++)\n        printf(\"%4d\", f(a));\n    return 0;\n}",
+      "answer": "b 是 auto 局部变量，每次调用都重新初始化为 3 再自增为 4；c 是 static 局部变量，只在第一次调用时初始化为 3，以后保留上次退出值：4、5、6。\n第1次：3+4+4=11；第2次：3+4+5=12；第3次：3+4+6=13。\n输出：  11  12  13（%4d，每个数占4位宽）。",
+      "keywords": ["static", "只初始化一次", "11", "12", "13"]
+    },
+    {
+      "id": "T4-func-fill",
+      "type": "函数体填空",
+      "prompt": "补全下面的函数：编写函数计算两个整数的较大者。要求补出（1）处函数首部中的返回类型和（2）处整行 return 语句。\n____(1)____ max(int x, int y)\n{\n    int z;\n    z = x > y ? x : y;\n    ____(2)____\n}\n另答：若在 main 中写 `int m = max(3, 5);`，为什么 max 的返回类型不能写成 void？",
+      "answer": "(1) int　(2) return z;（或 return (z);）\n因为 max(3,5) 出现在赋值表达式中，需要把返回值赋给 m；void 函数没有返回值，不能作为表达式参与赋值。有返回值函数的函数体中必须有 return 语句。",
+      "keywords": ["int", "return z", "void"]
+    },
+    {
+      "id": "T5-static-nonrecursion",
+      "type": "static 判断",
+      "prompt": "下列函数被循环调用：f(1), f(2), f(3), f(4)。写出每次调用的返回值，并解释 i 的初始化执行了几次。\nlong f(long n)\n{\n    static long i = 1;\n    i = n * i;\n    return i;\n}",
+      "answer": "i 是 static 局部变量，初始化为 1 只在第一次调用时执行一次（共 1 次），以后每次调用保留上次退出时的值。第1次 f(1)：i=1*1=1，返回 1；第2次 f(2)：i=2*1=2，返回 2；第3次 f(3)：i=3*2=6，返回 6；第4次 f(4)：i=4*6=24，返回 24。返回值依次为 1, 2, 6, 24（即各数的阶乘）——这正是教材例6-15 用'循环调用+static 局部变量'代替递归算 n! 的原理。",
+      "keywords": ["只初始化一次", "1", "2", "6", "24"]
+    },
+    {
+      "id": "T6-value-pass",
+      "type": "值传递判断",
+      "prompt": "写出下列程序的输出结果，并用'值传递'说明原因。\n#include <stdio.h>\nvoid s(int n)\n{\n    int i;\n    for (i = n - 1; i >= 1; i--) n = n + i;\n    printf(\"in_s=%d\\n\", n);\n}\nint main(void)\n{\n    int n = 100;\n    s(n);\n    printf(\"out_n=%d\\n\", n);\n    return 0;\n}",
+      "answer": "in_s=5050（函数内把形参 n 从 100 累加 1~99，1+2+…+100=5050）；out_n=100。\n原因：形参 n 是变量形式，属值传递——调用时把实参的值复制给形参，实参与形参占用不同的内存单元，形参怎么变都不影响实参，数据传递是单向的。",
+      "keywords": ["5050", "100", "值传递", "单向"]
+    },
+    {
+      "id": "T7-declaration",
+      "type": "声明辨析",
+      "prompt": "判断下列说法或语句的正误并改正：\n（1）double add(double x, double y); 是函数定义；\n（2）已定义 int max(int x, int y){...}，其声明可写为 int max(int, int); \n（3）被调函数定义写在主调函数之前，则函数声明可省略；\n（4）函数首部末尾可以加分号。",
+      "answer": "（1）错。末尾有分号的是函数声明（原型），定义必须有函数体且首部不加；\n（2）对。声明中形参名可以省略，只写类型和个数；\n（3）对。定义在前时编译程序已掌握该函数信息，声明可省；\n（4）错。函数首部不是语句，末尾不能加分号；加了分号就变成声明，调用会出错。",
+      "keywords": ["声明", "分号", "形参名"]
+    },
+    {
+      "id": "T8-array-param",
+      "type": "地址传递判断",
+      "prompt": "下列程序想通过函数把数组每个元素都加 1，能否成功？输出什么？为什么 addone 的形参写成 int a[] 时长度可以不写？\n#include <stdio.h>\nvoid addone(int a[], int n)\n{\n    int i;\n    for (i = 0; i < n; i++) a[i] += 1;\n}\nint main(void)\n{\n    int sco[3] = {10, 20, 30}, i;\n    addone(sco, 3);\n    for (i = 0; i < 3; i++) printf(\"%d \", sco[i]);\n    return 0;\n}",
+      "answer": "能成功。输出：11 21 31（阶段4验收R1纠正，原稿误写 30）。\n数组名作实参是地址传递：传递的是数组首地址，形参数组与实参数组共享同一片内存，a[i] 改变就是 sco[i] 改变。系统不为形参数组另行分配内存，也就不存在'按值复制整个数组'，所以一维形参数组的长度可以省略（只写 int a[]），长度信息由调用者通过另一形参 n 传入。",
+      "keywords": ["地址传递", "首地址", "共享", "长度可省"]
+    }
+  ],
+  "distractors": [
+    {
+      "id": "D1-C5-pointer",
+      "type": "C5 诱饵（指针）",
+      "prompt": "要把主调函数中两个变量真正交换，正确路径是（  ）\nA. 把 swap 的形参声明为 int x,int y，函数内交换后实参随之交换\nB. 在 swap 内加 return x, y; 返回两个值\nC. 把两个变量的地址传给形参（指针形参），函数内通过地址改原单元（第七章详解）\nD. 把 x,y 定义成 static 局部变量",
+      "answer": "C。值传递下形参是复印件（A 错）；return 只能返回一个值（B 错）；static 只延长生存期，与两函数间的数据共享无关（D 错）。'传地址实现真交换'的底层机制是 C5 指针单元内容，C4 只需判断到'值传递办不到，必须传地址'。",
+      "keywords": ["地址", "C5"]
+    },
+    {
+      "id": "D2-C1-expression",
+      "type": "C1 诱饵（表达式）",
+      "prompt": "已有 int a=2,b=3; 函数调用 f(a+b, a++) 中，第一个实参的值是（  ）\nA. 由函数 f 的返回值决定　B. 5（表达式 a+b 先求出确定的值再传给形参）　C. 形参　D. 地址",
+      "answer": "B。实参可以是常量、变量或表达式，但必须有确定的值：调用时先计算 a+b=5，把 5 复制给形参。'表达式求值与类型转换的细则'属 C1 表达式单元，C4 只需知道'实参必须有确定值'。注意 a++ 作实参这类副作用写法考试不深究求值顺序，属 C1/C2。",
+      "keywords": ["表达式", "确定的值", "C1"]
+    },
+    {
+      "id": "D3-C2-controlflow",
+      "type": "C2 诱饵（控制流）",
+      "prompt": "在递归函数 int f(int n){ if(n==1) return 1; else return n+f(n-1); } 中，'if...else...' 结构本身属于哪个单元的考点？\nA. C4 函数　B. C2 选择结构（控制流）　C. C5 指针　D. C3 数组",
+      "answer": "B。if...else 是 C2 选择结构的内容；C4 考的是把它组织进函数体、识别递归出口与递推式。单元边界：控制流语法归 C2，函数组织与递归跟踪归 C4。",
+      "keywords": ["C2", "控制流", "if...else"]
+    }
+  ],
+  "edges": [
+    {
+      "id": "E1-extern-trap",
+      "type": "edge（extern 声明与定义）",
+      "prompt": "下列程序能否编译通过？输出什么？把 `extern int w;` 改成 `int w;` 又会发生什么？\n#include <stdio.h>\nint l = 3, w = 4, h = 5;\nint vs(int l, int w)\n{\n    extern int h;\n    int v;\n    v = l * w * h;\n    return v;\n}\nint main(void)\n{\n    extern int w;\n    int l = 5;\n    printf(\"l=%d,w=%d,h=%d,v=%d\", l, w, h, vs(l, w));\n    return 0;\n}\n（教材例6-10 变式）",
+      "answer": "能编译。全局变量定义在文件开头，作用域本可达各函数；此处 extern int h; / extern int w; 是对已定义全局变量的声明（合法、可出现多次）。vs(l,w) 中形参 l=5,w=4 遮蔽同名全局变量，h 取全局 5，v=5*4*5=100；main 中 l=5 是局部变量遮蔽全局 l=3，w 取全局 4，h 取 5。输出：l=5,w=4,h=5,v=100。\n若把 main 内的 extern int w; 改为 int w; 则定义了新的局部变量 w 且未初始化，其值不确定——extern 是声明不是定义，这正是二者区别；定义只能在函数外且只能一次。",
+      "keywords": ["extern", "声明", "定义", "屏蔽"]
+    }
+  ]
+}

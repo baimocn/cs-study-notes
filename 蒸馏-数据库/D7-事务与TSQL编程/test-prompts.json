@@ -1,0 +1,84 @@
+{
+  "unit": "D7-事务与TSQL编程",
+  "minimum_pass_rate": 0.8,
+  "test_prompts": [
+    {
+      "id": "D7-01",
+      "type": "should_trigger",
+      "question": "自考简答：事务有哪四个特性（ACID）？每一特性是什么含义、起因于什么，请逐一展开说明。",
+      "expected_behavior": "给出事务=SQL Server 执行单元的定义，然后逐条展开：原子性=要么完成所有操作要么全部不运行；一致性=完成或失败时数据库都处于一致状态；隔离性=事务独立、不与其他事务交互冲突；持久性=提交后改变永久、掉电崩溃重启仍完整。并点出事务机制提出的原因：防止多用户访问同一数据时的数据异常。",
+      "answer": "事务是 SQL Server 中的执行单元，由一系列 T-SQL 语句组成，要么全部成功要么全部复原。ACID 四性：①原子性——事务是不可分的整体，某条语句失败则作为事务一部分的所有语句都不会运行；②一致性——事务完成或失败时数据库处于一致状态，由事务引发的状态变化是一致的；③隔离性——事务相互独立，不与数据库中的其他事务交互或冲突；④持久性——事务成功提交后对数据的改变是永久的，即使系统掉电或服务器崩溃，重启后事务结果仍完整。这些特性的提出是为了防止多用户并发访问同一数据时造成的数据异常。记忆钩子：原子=全做或全不做，一致=账目不坏，隔离=排队不串，持久=停电不丢。"
+    },
+    {
+      "id": "D7-02",
+      "type": "should_trigger",
+      "question": "简答：存储过程和触发器有什么根本区别？",
+      "expected_behavior": "指出两者都是预编译 SQL 语句集（触发器是特殊存储过程），核心区别是显式调用 vs 自动触发，并答出不能带参数、依附表/视图两点。",
+      "answer": "两者都是预编译后存放在数据库中的 SQL 语句集，触发器是事件驱动的特殊存储过程。根本区别：①调用方式——存储过程由用户通过名称或 EXEC 显式调用（如同请饭，点菜才上），触发器捆绑在基表上，用户对表中数据修改时自动激发（如同保安自动拦），不可能通过名称被直接调用；②参数——存储过程可接收输入参数并以输出参数返回多个值，触发器不允许使用参数；③依附性——存储过程是独立的数据库对象，触发器与表紧密相连、可看作表定义的一部分。"
+    },
+    {
+      "id": "D7-03",
+      "type": "should_trigger",
+      "question": "写代码题：在 student 数据库中创建存储过程 XIBU_INFOR（第10章例10.7），带一个输入参数接收系部代码，查询该系的系部名称与系主任；随后执行它查询系部代码'01'。",
+      "expected_behavior": "按四格填空输出 CREATE PROCEDURE ... @系部代码 CHAR(2) AS SELECT ... WHERE 系部代码=@系部代码，保存点；执行 EXEC XIBU_INFOR '01'。",
+      "answer": "USE student GO CREATE PROCEDURE XIBU_INFOR @系部代码 CHAR(2) AS SELECT 系部名称，系主任 FROM 系部 WHERE 系部代码=@系部代码  执行：EXEC XIBU_INFOR '01'。四格填空：CREATE PROCEDURE 过程名 → 参数（数据类型）→ AS → BEGIN/END 包主体语句；若过程是批处理中第一条语句，EXEC 可省略，直接写过程名。"
+    },
+    {
+      "id": "D7-04",
+      "type": "should_trigger",
+      "question": "判断并说明理由：“触发器虽然特殊，但也可以用 EXEC 命令像存储过程一样调用。",
+      "expected_behavior": "判错。引用 ch10.2.2 原文：触发器不可能通过名称被直接调用，更不允许使用参数；它由数据修改（DML 事件）自动激发。",
+      "answer": "错误。教材明确：触发器是特殊类型的存储过程，但不可能通过名称被直接调用，更不允许使用参数，它由用户对表中数据的插入/更新/删除（或 DDL 事件）自动激发。钩子：存储过程是请饭——EXEC 点名才上菜；触发器是保安自动拦——你一进门它自动出手，你不能喊它的名字让它表演。"
+    },
+    {
+      "id": "D7-05",
+      "type": "should_trigger",
+      "question": "写代码题：为“学生”表创建一个名为 del_xs 的删除后触发器（第10章例10.20），当删除“学生”表中的记录时，同时删除“课程注册”表中与该学号相关的记录。",
+      "expected_behavior": "按三步法判表（学生）→判句（FOR DELETE 后触发）→写虚表引用（DELETED）：CREATE TRIGGER del_xs ON 学生 FOR DELETE AS DELETE 课程注册 WHERE 学号 IN (SELECT 学号 FROM DELETED)。",
+      "answer": "USE student GO CREATE TRIGGER del_xs ON 学生 FOR DELETE AS DELETE FROM 课程注册 WHERE 学号 IN (SELECT 学号 FROM DELETED) 触发器三步法：①判表：数据改动发生在“学生”表→ON 学生；②判句：要求“同时删课程注册”=删完学生记录之后再删注册表，属后触发→FOR DELETE；③写虚表引用：被删除的行由系统写入 DELETED 逻辑表，触发器读它来逐条删除对应注册记录。（若外键约束阻止删除，可改用 INSTEAD OF DELETE 替代触发器，教材做法是先 DROP 再重新添加约束 fk_kczcxh。）"
+    },
+    {
+      "id": "D7-06",
+      "type": "should_trigger",
+      "question": "填空/简答：ROLLBACK TRANSACTION 使事务回滚到事务开始点时，全局变量 @@TRANCOUNT 的值如何变化？如果只回滚到 SAVE TRANSACTION 设置的保存点呢？另外@@ERROR 记录什么？",
+      "expected_behavior": "【考试按教材记】回滚到开始点→@@TRANCOUNT 减 1；只回滚到保存点→@@TRANCOUNT 不变；@@ERROR 记录最后执行的那条 T-SQL 语句的错误代码（0=无错），其后语句会将其清 0。【实操按真机辨】无保存点名的 ROLLBACK TRANSACTION 回滚的是最外层事务并把 @@TRANCOUNT 置 0（嵌套时不是减 1），出处 Microsoft Learn《@@TRANCOUNT (Transact-SQL)》。作答时两层口径都要会切换。",
+      "answer": "两层口径：【考试口径（按教材）】ROLLBACK TRAN 回到起点时 @@TRANCOUNT 减 1；回滚到保存点时值不变。【真机口径】无保存点名的 ROLLBACK TRANSACTION 回滚最外层事务，@@TRANCOUNT 直接归 0——嵌套时不是逐次减 1（Microsoft Learn《@@TRANCOUNT (Transact-SQL)》，阶段4盲测 D7-06 判实处）。@@ERROR 全局变量记录最后执行的那条 T-SQL 语句的错误代码，值为 0 表示正确。因为任何后续成功语句都会把 @@ERROR 置回 0，所以 IF @@ERROR<>0 判断必须紧跟出错语句（第 9 章例 9.3 的教训）。钩子：考试按教材、操作按真机——卷面写'减1'对，跑机时它'清零'。"
+    },
+    {
+      "id": "D7-07",
+      "type": "should_trigger",
+      "question": "填空：SQL Server 的注释有哪两种形式？多行块注释能否跨越批处理（GO）？",
+      "expected_behavior": "行内注释 --（至行尾）、块注释 /* */（可多行可嵌代码行）；整段注释必须包含在一个批处理中，多行注释不能跨越批处理。",
+      "answer": "两种：行内注释“-- 注释内容”，从双连字符到行尾；块注释“/* 注释内容 */”，可跨多行、可写在可执行代码内。注意：整个注释必须包含在一个批处理中，多行注释不能跨越批处理（GO 是封条，注释不是包裹内容，不能一头在外一头在内）。"
+    },
+    {
+      "id": "D7-08",
+      "type": "should_trigger",
+      "question": "填空：CREATE PROCEDURE / ALTER PROCEDURE / DROP PROCEDURE / EXECUTE 各自的功能分别是什么？查看存储过程文本信息的系统存储过程是哪一个？",
+      "expected_behavior": "创建、修改、删除、执行；查看文本 sp_helptext。",
+      "answer": "四动词：CREATE PROCEDURE 创建；ALTER PROCEDURE 修改（不更改权限，不影响相关存储过程或触发器）；DROP PROCEDURE 删除（可一次删多个，存储过程名间用英文逗号分隔）；EXECUTE（EXEC）执行。查看文本信息：sp_helptext 存储过程名（另有 sp_help 看一般信息、sp_depends 看相关性）。记忆钩子：建改删调四个动词外加查（sp_helptext）。"
+    }
+  ],
+  "decoys": [
+    {
+      "id": "D7-X1",
+      "type": "should_not_trigger",
+      "question": "T-SQL 中自定义标量值函数的返回值如何声明？内联表值函数的语法格式是什么？",
+      "expected_behavior": "不作为本单元问题回答；应路由到 D6 函数单元（CREATE FUNCTION 返回值/RETURNS 子句），不应混入存储过程四动词。",
+      "answer": "本单元不展开函数语法，请到 D6 函数单元。"
+    },
+    {
+      "id": "D7-X2",
+      "type": "should_not_trigger",
+      "question": "简答：SQL Server 2012 的身份验证模式有哪两种？GRANT 语句怎么给用户授予权限？",
+      "expected_behavior": "不作为本单元问题回答；应路由到 D8 安全管理单元（Windows 身份验证/SQL Server 身份验证、GRANT 权限语法）。",
+      "answer": "本单元只把 GRANT/REVOKE 当作隐式事务的清单成员一句话带过，授权机制请走 D8。"
+    }
+  ],
+  "edge": {
+    "id": "D7-E1",
+    "question": "既写存储过程又写触发器、且事务里又有 ROLLBACK 的复合题/混合题：如“创建触发器 up_jsrk 阻止修改‘教师任课’表的专业学级，并说明触发器中 ROLLBACK TRANSACTION 的作用、与用户的权限控制有何不同。",
+    "expected_behavior": "应同时满足：触发器三步法判表（教师任课）判句（FOR UPDATE + IF UPDATE(专业学级)）+ 虚表/ROLLBACK 收口；并区分：触发器 ROLLBACK 撤销的是“本次错误的数据改动”（保操作不坏），而 D8 权限回收（REVOKE）取消的是“长期访问资格”（保人不配看）。具体写法见 SKILL.md 复合判表模板。",
+    "answer": "参考骨架：CREATE TRIGGER up_jsrk ON 教师任课 FOR UPDATE AS IF UPDATE(专业学级) BEGIN PRINT('不能修改专业学级信息！') ROLLBACK TRANSACTION END；说明：触发器内 ROLLBACK 是把本次违约的修改整个撤销（操作不坏）；权限控制（D8）不关心单次操作，而是长期决定谁有权写（人不配看），二者互补。"
+  }
+}

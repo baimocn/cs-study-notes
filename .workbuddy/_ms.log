@@ -1,0 +1,21 @@
+﻿x
+-
+== 库 ==
+name
+----
+master
+tempdb
+model
+msdb
+MySchool
+自考题库
+已将数据库上下文更改为 "MySchool"。
+x
+-
+== 表 ==
+TABLE_NAME
+----------
+sysdiagrams
+成绩表
+课程表
+学生表

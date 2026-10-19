@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>计算机系统结构 · 知识导图</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#fafbfc;font-family:"Microsoft YaHei",sans-serif}
+  #bar{position:fixed;top:12px;right:16px;z-index:10;display:flex;gap:8px}
+  #bar button{border:1px solid #c8ccd0;background:#fff;border-radius:6px;padding:6px 12px;font-size:13px;cursor:pointer;color:#333}
+  #bar button:hover{background:#eef2f6}
+  #hint{position:fixed;bottom:12px;left:16px;font-size:12px;color:#98a2ad;z-index:10}
+  svg{cursor:grab;display:block;width:100vw;height:100vh}
+  svg.drag{cursor:grabbing}
+  text{user-select:none}
+</style>
+</head>
+<body>
+<div id="bar">
+  <button onclick="fitAll()">适应窗口</button>
+  <button onclick="setAll(true)">全部展开</button>
+  <button onclick="setAll(false)">全部折叠</button>
+</div>
+<div id="hint">滚轮缩放 · 拖拽平移 · 点击节点折叠/展开</div>
+<svg id="svg"></svg>
+<script>
+const DATA = {"t": "计算机系统结构", "c": [{"t": "冯·诺依曼结构", "c": [{"t": "五大特点", "c": [{"t": "存储程序：程序和数据一起存进同一个存储器——计算机能自动连续工作的根基", "c": []}, {"t": "二进制表示：指令和数据都用 0/1 编码", "c": []}, {"t": "指令组成：操作码(做什么) + 地址码(对谁做)", "c": []}, {"t": "顺序执行：指令一条接一条按序执行", "c": []}, {"t": "运算器为中心：数据流动都要经过运算器（早期结构的特征）", "c": []}]}, {"t": "核心思想：存储程序——把程序当数据存起来，机器自己取指令执行", "c": []}, {"t": "冯·诺依曼瓶颈", "c": [{"t": "是什么：取指令和取数据共用一条总线，不能同时进行，速度受限", "c": []}, {"t": "解决：哈佛结构=指令与数据分开存储；现代CPU在缓存层采用哈佛结构", "c": []}]}, {"t": "基本组成", "c": [{"t": "CPU = 运算器 + 控制器", "c": []}, {"t": "指令周期：取指 → 译码 → 执行 → 写回", "c": []}]}]}, {"t": "指令集架构：RISC 与 CISC", "c": [{"t": "RISC 精简指令集", "c": [{"t": "指令数量少、长度固定、寻址方式少", "c": []}, {"t": "只有 LOAD/STORE 能访存，其余指令只在寄存器间操作", "c": []}, {"t": "流水线效率高，适合编译器优化", "c": []}, {"t": "代表：ARM / MIPS", "c": []}]}, {"t": "CISC 复杂指令集", "c": [{"t": "指令数量多、长度可变、寻址方式多", "c": []}, {"t": "多种指令都能访存", "c": []}, {"t": "适合手写汇编", "c": []}, {"t": "代表：x86（Intel/AMD）", "c": []}]}]}, {"t": "流水线技术", "c": [{"t": "基本原理", "c": [{"t": "分阶段：把指令执行切成取指/译码/执行/写回多个阶段", "c": []}, {"t": "独立部件：每个阶段由专门的部件负责", "c": []}, {"t": "重叠执行：多条指令的不同阶段同时进行 → 提高吞吐率(单位时间完成指令数)", "c": []}]}, {"t": "三种冲突与对策", "c": [{"t": "数据冲突：后面的指令要用的结果还没算完 → 数据前递(旁路)", "c": []}, {"t": "控制冲突：遇到跳转不知该取哪条后继指令 → 分支预测", "c": []}, {"t": "结构冲突：多条指令抢同一个硬件部件 → 插入气泡 / 增加资源", "c": []}]}, {"t": "性能计算（n条指令、k段）", "c": [{"t": "流水线周期 = max(各级时间)——被最慢的段卡脖子", "c": []}, {"t": "总拍数 = k + n − 1：第一条指令走完要k拍，之后每拍出一条", "c": []}, {"t": "吞吐率 TP = n / [(k+n−1) × 流水线周期]（= 效率 ÷ 流水线周期；最大吞吐率 = 1/流水线周期）", "c": []}, {"t": "加速比 = k×n/(k+n−1)", "c": []}, {"t": "效率 = 加速比 ÷ k", "c": []}]}]}, {"t": "存储系统", "c": [{"t": "层次结构：寄存器 → L1 → L2 → L3缓存 → 内存 → 硬盘", "c": [{"t": "规律：越往上越快、越小、越贵；越往下越慢、越大、越便宜", "c": []}, {"t": "虚拟存储器 = 主存 + 辅存", "c": []}]}, {"t": "局部性原理（缓存有效的前提）", "c": [{"t": "时间局部性：刚访问过的数据很可能再次被访问", "c": []}, {"t": "空间局部性：被访问数据附近的数据很可能接着被访问", "c": []}]}, {"t": "Cache 工作流程：CPU先查Cache → 命中直接读(快) → 缺失去内存取并装入 → 满了按替换算法淘汰(LRU/FIFO/LFU)", "c": []}, {"t": "三种地址映射", "c": [{"t": "直接映射：主存块只能放固定行——简单、冲突率高", "c": []}, {"t": "全相联：可放任意行——灵活、查找慢", "c": []}, {"t": "组相联：先定组(直接映射)、组内任意(全相联)——折中，实际最常用", "c": []}]}, {"t": "命中率计算", "c": [{"t": "h = 命中次数 ÷ 总访问次数；缺失率 = 1 − h", "c": []}, {"t": "平均访问时间 = h×命中时间 + (1−h)×缺失时间", "c": []}]}]}, {"t": "性能与指令设计", "c": [{"t": "CPU性能公式", "c": [{"t": "CPU时间 = 指令数 × CPI × 时钟周期 = 指令数 × CPI ÷ 频率", "c": []}, {"t": "时钟周期 = 1 ÷ 频率；CPI = 每条指令平均所需时钟周期数", "c": []}, {"t": "MIPS = 频率 ÷ (CPI × 10⁶)", "c": []}]}, {"t": "阿姆达尔定律", "c": [{"t": "加速比 = 1 ÷ [(1−Fe) + Fe/Se]，Fe=可改进比例，Se=部件提速倍数", "c": []}, {"t": "含义：整体提速被\"没改进的部分\"卡死——优化要抓大头", "c": []}]}, {"t": "指令格式设计", "c": [{"t": "可表示指令数 = 2^操作码位数，〔操作码4位→16种指令〕", "c": []}, {"t": "寻址范围 = 2^地址码位数，〔地址码6位→64个寻址范围〕", "c": []}]}]}, {"t": "必背要点", "c": [{"t": "冯·诺依曼核心 = 存储程序；CPU = 运算器 + 控制器", "c": []}, {"t": "指令周期 = 取指、译码、执行、写回", "c": []}, {"t": "流水线加速比受限于最慢一级(瓶颈段)；效率与吞吐率同式可互检", "c": []}, {"t": "缓存命中率越高 CPU 效率越高；RISC = 定长 + 少指令", "c": []}, {"t": "虚拟存储器 = 主存 + 辅存", "c": []}]}]};
+
+const svg = document.getElementById('svg');
+const NS = 'http://www.w3.org/2000/svg';
+const GAPX = 70, GAPY = 14, LINEH = 19, PADX = 12, PADY = 8, MAXCHARS = 24;
+const COLORS = ['#1f77b4','#d62728','#2ca02c','#9467bd','#ff7f0e','#8c564b','#17becf','#bcbd22','#e377c2','#7f7f7f'];
+
+function wrap(t){
+  const lines = [];
+  for (const seg of t.split('\n')){
+    let cur = '';
+    for (const ch of seg){
+      cur += ch;
+      const w = [...cur].reduce((a,c)=>a+(c.charCodeAt(0)>255?1:0.55),0);
+      if (w >= MAXCHARS){ lines.push(cur); cur=''; }
+    }
+    lines.push(cur);
+  }
+  return lines.slice(0,6);
+}
+
+function measure(node, depth){
+  const lines = wrap(node.t);
+  node._lines = lines;
+  node._fs = depth===0?22:depth===1?17:13.5;
+  node._w = Math.max(...lines.map(l=>[...l].reduce((a,c)=>a+(c.charCodeAt(0)>255?node._fs:node._fs*0.55),0))) + PADX*2;
+  node._h = lines.length*(node._fs+4) + PADY*2 - 4;
+}
+
+let nodes = [];
+function layout(node, depth, x, colorIdx){
+  measure(node, depth);
+  node._x = x;
+  node._depth = depth;
+  node._color = depth===0 ? '#24292e' : COLORS[colorIdx % COLORS.length];
+  node._collapsed = depth >= 3;
+  let blockH;
+  if (!node.c || !node.c.length){ blockH = node._h; }
+  else {
+    let sum = (node.c.length-1)*GAPY;
+    node.c.forEach(ch => sum += ch._sub === undefined ? 0 : 0); // placeholder
+    // recursive
+  }
+  return blockH;
+}
+
+// proper recursive layout
+function calcSub(node, depth){
+  measure(node, depth);
+  if (node._collapsed === undefined) node._collapsed = depth >= 3;
+  if (!node.c || !node.c.length || node._collapsed){ node._sub = node._h; }
+  else {
+    let sum = (node.c.length-1)*GAPY;
+    for (const ch of node.c) sum += calcSub(ch, depth+1);
+    node._sub = Math.max(node._h, sum);
+  }
+  return node._sub;
+}
+calcSub(DATA, 0);
+
+function assign(node, depth, x, top, colorIdx){
+  node._x = x;
+  node._depth = depth;
+  if (depth === 0) node._color = '#24292e';
+  else if (depth === 1) node._color = COLORS[colorIdx % COLORS.length];
+  else node._color = node._pcolor || COLORS[colorIdx % COLORS.length];
+  node._pcolor = node._color;
+  const cy = top + node._sub/2;
+  node._y = cy - node._h/2;
+  if (node.c && node.c.length && !node._collapsed){
+    let y = top;
+    node.c.forEach((ch, i) => {
+      ch._parent = node;
+      assign(ch, depth+1, x + node._w + GAPX, y, depth===0 ? i : colorIdx);
+      y += ch._sub + GAPY;
+    });
+  }
+}
+assign(DATA, 0, 0, 0, 0);
+
+function visible(node, out){
+  out.push(node);
+  if (node.c && node.c.length && !node._collapsed)
+    for (const ch of node.c) visible(ch, out);
+  return out;
+}
+
+function render(){
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  const g = document.createElementNS(NS,'g');
+  const shown = visible(DATA, []);
+  // links
+  for (const n of shown){
+    if (n._parent && n._parent._x !== undefined){
+      const p = n._parent;
+      const x1 = p._x + p._w, y1 = p._y + p._h/2;
+      const x2 = n._x, y2 = n._y + n._h/2;
+      const mx = (x1+x2)/2;
+      const path = document.createElementNS(NS,'path');
+      path.setAttribute('d', `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`);
+      path.setAttribute('fill','none');
+      path.setAttribute('stroke', n._pcolor || '#bbb');
+      path.setAttribute('stroke-width','1.6');
+      path.setAttribute('opacity','0.55');
+      g.appendChild(path);
+    }
+  }
+  // nodes
+  for (const n of shown){
+    const grp = document.createElementNS(NS,'g');
+    const rect = document.createElementNS(NS,'rect');
+    rect.setAttribute('x', n._x); rect.setAttribute('y', n._y);
+    rect.setAttribute('width', n._w); rect.setAttribute('height', n._h);
+    rect.setAttribute('rx', 8);
+    rect.setAttribute('fill', n._depth===0 ? '#24292e' : '#ffffff');
+    rect.setAttribute('stroke', n._depth<=1 ? n._color : '#d5dae0');
+    rect.setAttribute('stroke-width', n._depth<=1 ? 2 : 1.2);
+    rect.style.filter = 'drop-shadow(0 1px 2px rgba(0,0,0,0.08))';
+    grp.appendChild(rect);
+    const text = document.createElementNS(NS,'text');
+    text.setAttribute('x', n._x + PADX);
+    text.setAttribute('y', n._y + PADY + n._fs);
+    text.setAttribute('font-size', n._fs);
+    text.setAttribute('fill', n._depth===0 ? '#fff' : '#2b3137');
+    if (n._depth===1) text.setAttribute('font-weight','bold');
+    n._lines.forEach((l,i)=>{
+      const ts = document.createElementNS(NS,'tspan');
+      ts.setAttribute('x', n._x + PADX);
+      if (i>0) ts.setAttribute('dy', n._fs+4);
+      ts.textContent = l;
+      text.appendChild(ts);
+    });
+    grp.appendChild(text);
+    if (n.c && n.c.length){
+      // collapse indicator
+      const dot = document.createElementNS(NS,'circle');
+      const hasHidden = n._collapsed;
+      dot.setAttribute('cx', n._x + n._w + 4);
+      dot.setAttribute('cy', n._y + n._h/2);
+      dot.setAttribute('r', hasHidden ? 8 : 3.5);
+      dot.setAttribute('fill', hasHidden ? (n._pcolor||n._color) : '#c3cad2');
+      if (hasHidden){
+        const cnt = document.createElementNS(NS,'text');
+        cnt.setAttribute('x', n._x + n._w + 4);
+        cnt.setAttribute('y', n._y + n._h/2 + 3.5);
+        cnt.setAttribute('font-size','9');
+        cnt.setAttribute('fill','#fff');
+        cnt.setAttribute('text-anchor','middle');
+        cnt.textContent = countDesc(n);
+        grp.appendChild(cnt);
+      }
+      grp.appendChild(dot);
+    }
+    if (n.c && n.c.length){
+      grp.style.cursor = 'pointer';
+      grp.addEventListener('click', e => {
+        e.stopPropagation();
+        n._collapsed = !n._collapsed;
+        relayout();
+      });
+    }
+    g.appendChild(grp);
+  }
+  svg.appendChild(g);
+  applyTransform();
+}
+
+function countDesc(n){
+  let c = 0;
+  (function walk(x){ for(const ch of (x.c||[])){ c++; if(x._collapsed||true) walk(ch);} })(n);
+  return c > 99 ? '99+' : c;
+}
+
+function relayout(){
+  DATA._collapsed = false;
+  nodes = [];
+  // reset subtree
+  (function reset(n){ n._sub = undefined; (n.c||[]).forEach(reset); })(DATA);
+  calcSub(DATA, 0);
+  assign(DATA, 0, 0, 0, 0);
+  render();
+}
+
+// ---- pan & zoom ----
+let tx = 60, ty = 60, scale = 1;
+function applyTransform(){
+  const g = svg.firstChild;
+  if (g) g.setAttribute('transform', `translate(${tx},${ty}) scale(${scale})`);
+}
+svg.addEventListener('wheel', e => {
+  e.preventDefault();
+  const k = e.deltaY < 0 ? 1.15 : 1/1.15;
+  const rect = svg.getBoundingClientRect();
+  const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+  tx = cx - (cx - tx) * k;
+  ty = cy - (cy - ty) * k;
+  scale *= k;
+  applyTransform();
+}, {passive:false});
+let dragging = false, lx=0, ly=0;
+svg.addEventListener('mousedown', e => { dragging = true; lx=e.clientX; ly=e.clientY; svg.classList.add('drag'); });
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  tx += e.clientX - lx; ty += e.clientY - ly; lx=e.clientX; ly=e.clientY;
+  applyTransform();
+});
+window.addEventListener('mouseup', () => { dragging = false; svg.classList.remove('drag'); });
+
+// 按宽度适配并限制最小缩放,保证文字可读;停在树的顶部
+function fit(){
+  relayout();
+  const bbox = g0bbox();
+  const W = window.innerWidth;
+  scale = Math.min(W/bbox.w, 1.1) * 0.95;
+  if (scale < 0.5) scale = 0.5;
+  tx = (W - bbox.w*scale)/2 - bbox.x*scale;
+  if (tx > 40) tx = 40;
+  ty = 24;
+  applyTransform();
+}
+// 整卷概览:强行缩放到全图可见
+function fitAll(){
+  relayout();
+  const bbox = g0bbox();
+  const W = window.innerWidth, H = window.innerHeight;
+  scale = Math.min(W/bbox.w, H/bbox.h, 1.1) * 0.95;
+  tx = (W - bbox.w*scale)/2 - bbox.x*scale;
+  ty = (H - bbox.h*scale)/2 - bbox.y*scale;
+  applyTransform();
+}
+function g0bbox(){
+  const shown = visible(DATA, []);
+  let minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
+  for (const n of shown){
+    minX = Math.min(minX, n._x); minY = Math.min(minY, n._y);
+    maxX = Math.max(maxX, n._x+n._w); maxY = Math.max(maxY, n._y+n._h);
+  }
+  return {x:minX,y:minY,w:maxX-minX,h:maxY-minY};
+}
+function setAll(open){
+  (function walk(n){ if(n._depth>0) n._collapsed = !open; (n.c||[]).forEach(walk); })(DATA);
+  relayout(); fit();
+}
+window.addEventListener('resize', fit);
+render(); fit();
+</script>
+</body>
+</html>

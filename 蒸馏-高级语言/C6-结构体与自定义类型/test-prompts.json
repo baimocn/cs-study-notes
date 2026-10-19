@@ -1,0 +1,94 @@
+{
+  "unit": "C6-结构体类型",
+  "source_book": "《高级语言程序设计（2017年版）》郑岩",
+  "source_chapter": "ch08",
+  "minimum_pass_rate": 0.8,
+  "notes": "共用体/枚举考点在本书 ch08 零收录，按'指正不假夸'红线不出共用体读结果题，改以书内最高频的'指针级联读结果'承担等权重；诱饵题全部同题面换考点。",
+  "triggers": [
+    {
+      "id": "T1",
+      "type": "fill_blank",
+      "stem": "设 struct student { int no; char name[10]; } s, *p = &s;。要访问成员 no：用变量 s 时写 s___no（填一个运算符）；用指针 p 时写 p___no 或 (___p).no（各填一个运算符/符号）。依次写出三处空。",
+      "answer": "s.no；p->no；(*p).no",
+      "point": "成员访问 . vs -> 的条件反射；*p 外圆括号不能省",
+      "anchor": "ch08 §8.2/§8.4，P264/P271"
+    },
+    {
+      "id": "T2",
+      "type": "read_output",
+      "stem": "写出程序输出：\n#include <stdio.h>\nstruct node { int num; struct node *next; } *p, x[3] = {1, x+1, 2, x+2, 3, NULL};\nint main(void) { p = x; printf(\"%d,%d\\n\", p->num, p->next->num); return 0; }",
+      "answer": "1,2",
+      "point": "结构体自引用成员（链表节点雏形）+ 指针级联 p->next->num；p+1 走一个元素而非一个成员",
+      "anchor": "ch08 程序分析2，P290"
+    },
+    {
+      "id": "T3",
+      "type": "read_output",
+      "stem": "写出程序输出：\n#include <stdio.h>\n#include <string.h>\nstruct node { char name[20]; int age; };\nvoid fun1(struct node s) { struct node n = {\"zhangsan\", 23}; s = n; }\nvoid fun2(struct node *t) { struct node n = {\"lisi\", 24}; *t = n; }\nint main(void) {\n  struct node stu1 = {\"wangwu\", 25}, stu2 = {\"zhaoliu\", 26};\n  fun1(stu1); fun2(&stu2);\n  printf(\"%d,%d\\n\", stu1.age, stu2.age);\n  return 0;\n}",
+      "answer": "25,24",
+      "point": "值传递复制不改实参（fun1），指针解引用真改（fun2）",
+      "anchor": "ch08 程序分析4，P291"
+    },
+    {
+      "id": "T4",
+      "type": "short_answer",
+      "stem": "简答：结构体类型与数组类型有什么区别？从'成员类型是否相同''访问方式''能否整体赋值'三方面作答。",
+      "answer": "①数组元素类型必须相同，结构体成员类型可以不同；②数组按下标访问元素，结构体按成员名用 . 或 -> 访问；③数组不能整体赋值，同类型结构体变量之间可以整体赋值（但都不能用 == 比较）。",
+      "point": "结构体 vs 数组；'能抄不能比'",
+      "anchor": "ch08 §8.1/§8.2/§8.3，P259/P265"
+    },
+    {
+      "id": "T5",
+      "type": "fill_blank",
+      "stem": "struct date { int year, month, day; }; struct date d = {2017, 10, 1}, *p = &d;。①写出使指针 p 指向 d 的定义中已有语句之外的等价赋值语句：p = ______；②printf(\"%d\", ______) 输出 d 的成员 month，要求用 p 写（两种写法任写一种）。",
+      "answer": "① p = &d; ② p->month 或 (*p).month",
+      "point": "&变量 只能存入同类型结构体指针；-> 与 (*p). 等价",
+      "anchor": "ch08 §8.2 一.3/§8.4 一，P266/P271"
+    },
+    {
+      "id": "T6",
+      "type": "read_output",
+      "stem": "设 struct s { int a, b; } d[3] = {{1,4},{2,5},{6,7}};，执行 printf(\"%d\\n\", d[2].a * d[2].b / d[1].b); 输出什么？",
+      "answer": "8（d[2].a=6, d[2].b=7, d[1].b=5：6*7/5 整除 = 42/5 = 8）",
+      "point": "结构体数组元素成员访问与运算；注意整除截断",
+      "anchor": "ch08 练习一.1，P286"
+    }
+  ],
+  "decoys": [
+    {
+      "id": "D1",
+      "type": "multiple_choice",
+      "surface": "同题面：int a[5] = {1,2,3,4,5}; a[2] = ? 与 struct s { int a; } d[3] = {{1},{2},{3}}; d[2].a = ?",
+      "trap": "题面都是'数组第3个元素取值'，但 C3 考纯下标 a[2]（从0数），本单元 d[2].a 才是结构体数组——若考生把本单元题当纯数组题做，会漏掉'成员名'这一层；反之 C3 题里出现的 .成员 属于本单元越界考点",
+      "discriminator": "出现'成员名.字段'判 C6；只有裸下标判 C3",
+      "correct_answer": "C3 题：a[2]=3；C6 题：d[2].a=3",
+      "unit_confused": "C3"
+    },
+    {
+      "id": "D2",
+      "type": "multiple_choice",
+      "surface": "同题面：int a = 3, *p = &a;，下列哪个是取值？A. *p B. p.a C. p->a D. &p",
+      "trap": "p 指向的是普通 int 变量不是结构体变量——p->a 非法（int 没有'成员'）。考 C5 的 *p 解引用本体，不是 C6 的 -> 成员访问",
+      "discriminator": "-> 只能用在结构体指针上；指向基本类型的指针取值用 *p，判 C5",
+      "correct_answer": "A",
+      "unit_confused": "C5"
+    },
+    {
+      "id": "D3",
+      "type": "multiple_choice",
+      "surface": "同题面：写一个函数修改调用者的数据。void f(int x) { x = 10; } 与 void g(struct node *t) { t->age = 10; }",
+      "trap": "第一问考 C4 值传递不影响实参的通用规则；第二问虽也涉及传参，但考点在 t->age 解引用改成员，判 C6。若把本单元的指针形参题当 C4 纯值/址题答（'都不改'），就会把 25,24 题答错",
+      "discriminator": "形参是 struct 指针且操作'成员'判 C6；形参是基本类型判 C4",
+      "correct_answer": "f 不改变实参；g 改变实参的 age 成员为 10",
+      "unit_confused": "C4"
+    }
+  ],
+  "edge": {
+    "id": "E1",
+    "type": "multiple_choice",
+    "stem": "设 struct node { int i; struct node *next; } s1 = {10, NULL}, s2 = {20, NULL};。下列关于语句 s1.next = &s2; 与后续 p->next->i（p 指向 s1）的说法，正确的是：A. 非法，因为结构体成员不能是自身类型指针 B. 合法，成员可以是指向本结构体类型的指针，p->next->i 的值为 20 C. 合法，但 p->next->i 的值为 10 D. 非法，因为 s2 必须先赋给 s1 的成员变量",
+    "answer": "B",
+    "point": "结构体自引用成员只能是'本结构体类型的指针'（不能是本结构体类型变量）——链表节点雏形；级联访问取到下一节点成员",
+    "anchor": "ch08 例8-14 P272、填空8 P288、程序分析2 P290"
+  }
+}

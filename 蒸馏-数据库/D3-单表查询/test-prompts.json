@@ -1,0 +1,101 @@
+{
+  "unit_id": "D3-单表查询",
+  "source_book": "《数据库原理与技术（SQL Server 2012）》",
+  "source_chapter": "ch05",
+  "minimum_pass_rate": 0.8,
+  "note": "所有题干自包含，不依赖教材页码。should_trigger=应激活本单元技能作答的题；decoy=不应激活（属兄弟单元）的题；edge=边界判断题。",
+  "should_trigger": [
+    {
+      "id": "D3-ST-01",
+      "type": "short_answer",
+      "prompt": "设表 sc(sno char(8), cno char(4), grade int)。写出查询每门课程的课程号和选课人数，只输出选课人数不少于 5 人的课程，按人数降序排列的 SQL 语句。",
+      "answer": "SELECT cno, COUNT(*) AS 人数 FROM sc GROUP BY cno HAVING COUNT(*)>=5 ORDER BY COUNT(*) DESC;",
+      "key_points": ["GROUP BY cno", "HAVING COUNT(*)>=5（人数是组级条件，不能写 WHERE）", "ORDER BY 降序"]
+    },
+    {
+      "id": "D3-ST-02",
+      "type": "judge_with_reason",
+      "prompt": "判断下列语句是否正确并说明理由：SELECT sno, 2024-YEAR(birth) AS age FROM student WHERE age >= 18;",
+      "answer": "错误。逻辑执行顺序是 FROM→WHERE→SELECT→…，WHERE 执行时 SELECT 的别名 age 尚不存在。WHERE 中应写原始表达式：WHERE 2024-YEAR(birth)>=18。",
+      "key_points": ["书写顺序≠执行顺序", "WHERE 不能用 SELECT 别名", "改写为原始表达式"]
+    },
+    {
+      "id": "D3-ST-03",
+      "type": "short_answer",
+      "prompt": "表 emp(empno int, ename varchar(20), salary int, deptno char(2), bonus int)，bonus 允许为 NULL，表中有 100 行，其中 bonus 为 NULL 的有 12 行。问：SELECT COUNT(*), COUNT(bonus), AVG(bonus) FROM emp; 三个结果分别是多少？说明 AVG 的分母是多少。",
+      "answer": "COUNT(*)=100（计所有行，含 NULL 行）；COUNT(bonus)=88（跳过 NULL）；AVG(bonus)=非空 bonus 之和除以 88——分母是 88 不是 100，因为 SUM/AVG 忽略 NULL。",
+      "key_points": ["COUNT(*) 含 NULL 行", "COUNT(列)/AVG 忽略 NULL", "AVG 分母为非空个数"]
+    },
+    {
+      "id": "D3-ST-04",
+      "type": "short_answer",
+      "prompt": "表 t(sname varchar(20), phone varchar(15), score int)。写出满足以下要求的单条查询：姓名以'张'开头且姓名共 3 个字、成绩在 80 分（含）到 89 分（含）之间的记录的姓名和电话。",
+      "answer": "SELECT sname, phone FROM t WHERE sname LIKE '张__' AND score BETWEEN 80 AND 89;",
+      "key_points": ["LIKE '张__'：张后恰好两个字符（_ 为单个字符）", "BETWEEN 含两端 80 和 89", "AND 连接多重条件"]
+    },
+    {
+      "id": "D3-ST-05",
+      "type": "multiple_choice",
+      "prompt": "表 student(sno, sname, dept, note)。下列哪个语句能查出 note 列为空值的行？A. WHERE note=NULL  B. WHERE note IS NULL  C. WHERE note==NULL  D. WHERE NOT(note<>NULL)",
+      "answer": "B。判空唯一写法 IS NULL / IS NOT NULL；NULL 与任何值用 =、<> 比较结果都不是 TRUE，A/C/D 均查不出。选项 C 另有双重错误：== 在 T-SQL 中本身即非法写法（T-SQL 的相等比较运算符只有 =），即使把判空语义改对，该语句也过不了语法关——C 属于'语义+语法'双重错误选项。",
+      "key_points": ["IS NULL 是唯一判空谓词", "=NULL 语义上永不为真", "T-SQL 无 == 运算符（选项 C 双重错误）"]
+    },
+    {
+      "id": "D3-ST-06",
+      "type": "short_answer",
+      "prompt": "表 sc(sno, cno)。学号 sno 每选一门课一条记录。分别写出：(1) 查询所有出现过的学号（允许重复行）；(2) 查询共有多少个不同的学生选了课；并说明 (1) 中若加 DISTINCT 与关系代数哪个运算对应。",
+      "answer": "(1) SELECT sno FROM sc; (2) SELECT COUNT(DISTINCT sno) FROM sc; (1) 加 DISTINCT 后对应关系代数的投影 π_sno(sc)——投影运算自动去除重复元组，SQL 需显式 DISTINCT。",
+      "key_points": ["DISTINCT 去重", "COUNT(DISTINCT 列) 计不同值", "DISTINCT ↔ 投影 π"]
+    },
+    {
+      "id": "D3-ST-07",
+      "type": "short_answer",
+      "prompt": "表 emp(ename varchar(20), dept varchar(20), hiredate date)。写出查询：2010 年（含）以前入职的员工姓名，先按部门升序、同一部门按入职日期降序排列。",
+      "answer": "SELECT ename, dept, hiredate FROM emp WHERE hiredate <= '2010-12-31' ORDER BY dept ASC, hiredate DESC;",
+      "key_points": ["多列排序：先 dept 升序再 hiredate 降序，方向独立", "WHERE 日期条件", "ASC 可省略，DESC 必须显式"]
+    },
+    {
+      "id": "D3-ST-08",
+      "type": "judge_with_reason",
+      "prompt": "表 emp(dept varchar(20), salary int)。某同学写出：SELECT dept, AVG(salary) AS avg_sal FROM emp GROUP BY dept WHERE AVG(salary)>3000; 指出错误并改正。",
+      "answer": "两处错误：①聚合条件必须用 HAVING 不是 WHERE；②子句顺序错，WHERE 应在 GROUP BY 之前、HAVING 在之后。改正：SELECT dept, AVG(salary) AS avg_sal FROM emp GROUP BY dept HAVING AVG(salary)>3000;",
+      "key_points": ["HAVING 作用于组，WHERE 作用于行/表", "书写顺序 SELECT→FROM→WHERE→GROUP BY→HAVING→ORDER BY 不可乱"]
+    }
+  ],
+  "decoy": [
+    {
+      "id": "D3-DC-01",
+      "type": "short_answer",
+      "prompt": "写出创建表 course(cno char(4) PRIMARY KEY, cname varchar(30) NOT NULL, credit smallint) 的 T-SQL 语句。",
+      "expected_unit": "D2-DDL建表",
+      "reason": "CREATE TABLE 建表语句，属 DDL，不是查询。虽然出现列名等元素，但无 SELECT 五子句语义。",
+      "reject_signal": "CREATE TABLE，无 SELECT"
+    },
+    {
+      "id": "D3-DC-02",
+      "type": "short_answer",
+      "prompt": "表 student(sno, sname, dept)，course(cno, cname)，sc(sno, cno, grade)。写出查询选修了'高等数学'课程的学生的学号和姓名的 SQL 语句（学生信息在 student 表，课程名在 course 表）。",
+      "expected_unit": "D4-连接查询",
+      "reason": "同时涉及 student、course、sc 三个表，必须连接查询（或子查询），不是单表查询，D3 的五子句骨架不适用。",
+      "reject_signal": "三个表名 + 需 JOIN/子查询"
+    },
+    {
+      "id": "D3-DC-03",
+      "type": "short_answer",
+      "prompt": "表 emp(empno, dept, salary)。写出查询每个部门工资高于本部门平均工资的员工号的 SQL 语句。",
+      "expected_unit": "D6-子查询",
+      "reason": "'本部门平均工资'是随行变化的相关子查询（SELECT AVG…WHERE 外层 dept=内层 dept），单表五子句的 GROUP BY/HAVING 无法表达'与本行所属组均值比较'。",
+      "reject_signal": "相关子查询 / 比较运算符连接子查询"
+    }
+  ],
+  "edge": [
+    {
+      "id": "D3-ED-01",
+      "type": "multiple_choice",
+      "prompt": "表 t(x int)。语句 SELECT x FROM t WHERE x BETWEEN 80 AND 89 与下列哪组的查询结果完全相同（整数列）？A. WHERE x>=80 AND x<89  B. WHERE x>80 AND x<=89  C. WHERE x>=80 AND x<=89  D. WHERE x IN (80,89)",
+      "answer": "C。BETWEEN 下限 AND 上限含两端，等价于 >=80 AND <=89；A 是 [80,89) 半开区间（教材例 5.17 的写法），B 漏 80，D 只含两个点值。",
+      "key_points": ["BETWEEN 含两端", "半开区间须拆写 >= AND <", "IN 是离散点集不是区间"],
+      "why_edge": "考察 BETWEEN 边界语义：题面像'范围'陷阱题，但仍属单表 WHERE 谓词，是 D3 应当接住的边界题——既测 DISTINCT 谓词边界，也测与例 5.17 半开区间写法的区分。"
+    }
+  ]
+}

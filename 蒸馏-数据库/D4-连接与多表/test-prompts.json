@@ -1,0 +1,100 @@
+{
+  "unit": "D4-连接与多表",
+  "created": "2026-09-13",
+  "should_trigger": [
+    {
+      "id": "D4-ODBC-01",
+      "prompt": "在 ODBC 分层体系结构中，检查 ODBC 函数调用参数的合法性、为应用程序加载 DBMS 驱动程序，这些工作是由哪一层完成的？（A）ODBC 数据库应用程序（B）驱动程序管理器（C）DBMS 驱动程序（D）数据源",
+      "should_trigger": true,
+      "answer": "B",
+      "explanation": "加载驱动、检查参数合法性、提供单一入口是驱动程序管理器（一个 DLL）的职责；DBMS 驱动程序负责建立连接、提交 SQL、转换数据格式和错误码。ODBC 四层：应用程序→驱动程序管理器→DBMS 驱动程序→数据源。",
+      "notes": "ODBC 分层概念题（任务要求必含类型），依据 ch12 §12.1.1 教材原文。"
+    },
+    {
+      "id": "D4-JOIN-02",
+      "prompt": "学生表有 10 行，其中 8 名学生有成绩记录，成绩表中这 8 名学生各有 1 条记录（成绩表中除这 8 条记录外无其他记录），另有 2 名学生没有任何成绩记录。执行 SELECT * FROM 学生 LEFT OUTER JOIN 成绩 ON 学生.学号=成绩.学号，结果集共有多少行？若改用 RIGHT OUTER JOIN 呢？",
+      "should_trigger": true,
+      "answer": "LEFT JOIN 返回 10 行（8 行配上的 + 2 行保留的左表孤行，其成绩列全为 NULL）；若成绩表无多余行，RIGHT JOIN 只返回配上的 8 行，2 名无成绩学生被舍弃。",
+      "explanation": "外连接结果 = 配上的行 + 保留侧没配上的行（对侧补 NULL）。左外连接保留左表孤行，右外连接保留右表孤行。本题模式仿照教材例5.32/5.33（学生 LEFT/RIGHT JOIN 成绩，LEFT 保留 6 名无成绩学生，RIGHT 舍弃之）。",
+      "notes": "JOIN 行数计算题（任务要求必含类型）。数字情境仿教材例5.32 的'保留无成绩学生'结构改编；教材原例为 6 名学生，此处为避免与原题重复改用 10/8/2 数字，概念与判定依据完全取自教材。"
+    },
+    {
+      "id": "D4-JOIN-03",
+      "prompt": "等值连接与自然连接的区别和联系是什么？",
+      "should_trigger": true,
+      "answer": "联系：两者都要求比较分量为相同的属性组，θ 均为'='，都是从广义笛卡儿积中选取属性值相等的元组。区别：自然连接要在等值连接的结果中去掉重复的属性列；等值连接只从行的角度运算，自然连接同时从行和列两个角度运算。",
+      "explanation": "这是 ch05 练习题第 5 题原题。层次：θ连接 ⊃ 等值连接 ⊃ 自然连接。",
+      "notes": "教材原题直出（ch05 习题）。"
+    },
+    {
+      "id": "D4-ADO-04",
+      "prompt": "在 ASP 中通过 ADO 访问 SQL Server 数据库时，最重要的三个 ADO 对象是哪三个？各自的作用是什么？ADO 一般的使用流程是怎样的？",
+      "should_trigger": true,
+      "answer": "connection（到数据源的连接）、command（可被数据源执行的命令）、recordset（数据源返回的记录集）。流程：连接到数据源 → 给出访问命令及参数 → 执行命令 → 处理返回的结果集 → 关闭连接。",
+      "explanation": "ADO 构建于 OLE DB API 之上，是面向对象、与语言无关的接口；error 是错误信息对象，field 是 recordset 的列。",
+      "notes": "ADO 三成员概念题，依据 ch12 §12.4.2/§12.1.3 教材原文。"
+    },
+    {
+      "id": "D4-ODBC-05",
+      "prompt": "判断题：ODBC 的数据源（DSN）就是一个数据库。（ ）并说明数据源的作用及其三种类型中哪一种可供所有用户使用。",
+      "should_trigger": true,
+      "answer": "错。数据源不是 DBS（数据库系统），而是用于表达一个 ODBC 驱动程序和 DBMS 特殊连接的命名，是驱动程序与数据库连接的桥梁。三类：用户数据源（仅创建者、仅本机可用）、系统数据源（所有用户和以服务方式运行的程序均可用）、文件数据源（ODBC 3.0 以上版本新增）。所有用户可用的是系统数据源。",
+      "explanation": "教材 §12.1.1 原话：'数据源不是 DBS，而是用于表达一个 ODBC 驱动程序和 DBMS 特殊连接的命名'。",
+      "notes": "数据源概念辨析题，教材原文。"
+    },
+    {
+      "id": "D4-JOIN-06",
+      "prompt": "自身连接查询中，为什么必须为表指定别名？以'教师任课'表查询至少为两个专业开设课程的教师为例说明。",
+      "should_trigger": true,
+      "answer": "因为自身连接是同一张表与自己连接，FROM 子句中同一表出现两次，不加别名无法区分两个副本，列引用会产生二义性。写法：FROM 教师任课 AS first JOIN 教师任课 AS second ON first.教师编号=second.教师编号 AND first.专业代码!=second.专业代码。",
+      "explanation": "教材 §5.3.3：'使用自身连接时，必须为表指定两个别名，以示区别'（例5.31）。",
+      "notes": "教材原例（例5.31）的概念化改写。"
+    }
+  ],
+  "decoys": [
+    {
+      "id": "D4-D3-decoy",
+      "prompt": "使用 SELECT 语句从学生表中查询所有性别为'女'且 1995 年以后出生的学生的学号、姓名，按学号升序排列。",
+      "expected_trigger": false,
+      "reason": "单表 WHERE 条件查询 + ORDER BY，无任何 JOIN、无多表、无 ODBC/ADO 概念，属于 D3 单表查询单元，不应触发 D4。",
+      "notes": "兄弟单元 D3 诱饵（任务要求必含）。"
+    },
+    {
+      "id": "D4-D8-decoy",
+      "prompt": "SQL Server 中，创建登录账号 StudentAdm 并禁止其登录，再为数据库用户设置对'学生'表的 SELECT、INSERT、UPDATE、DELETE 权限，应如何操作？",
+      "expected_trigger": false,
+      "reason": "登录账号与权限管理属于安全管理（D8-安全）单元；本例中的'账号/权限'与 D4 的'连接'仅共享'连接数据库'字面语义，考区完全不同，不应触发 D4。",
+      "notes": "兄弟单元 D8-安全 诱饵（任务要求必含）。"
+    },
+    {
+      "id": "D4-D5-decoy",
+      "prompt": "查询没有选修 Math02 课程的学生学号与姓名，要求用子查询（嵌套查询）实现。",
+      "expected_trigger": false,
+      "reason": "嵌套/子查询是 D5/D6 单元考区。虽然 ch05 提到'某些嵌套查询可用连接运算替代'，但题目明确要求子查询实现且考点是差运算/嵌套结构，不是连接类型或 ON 条件，不应触发 D4 主判据。",
+      "notes": "相邻单元边界诱饵：与 D4 有弱关联（连接 vs 子查询互换），但按 B 区混淆表二归属 D5/D6。"
+    }
+  ],
+  "edge": [
+    {
+      "id": "D4-edge-01",
+      "prompt": "SELECT S.学号, S.姓名, C.课程号, C.成绩 FROM 学生 AS S LEFT JOIN 课程注册 AS C ON S.学号=C.学号 WHERE C.成绩>=70 AND C.成绩<=80 —— 这条语句想要'列出每个学生（包括没有成绩的）及其 70–80 分之间的课程成绩'，能达到目的吗？",
+      "expected_trigger": true,
+      "answer": "不能。WHERE 里对右表列 C.成绩 的过滤会把补 NULL 的保留行全部剔掉（NULL 与 70 比较为未知，不满足 >=70），LEFT JOIN 退化成内连接，没成绩的学生全被丢掉。要把成绩条件放进 ON：ON S.学号=C.学号 AND C.成绩>=70 AND C.成绩<=80。",
+      "explanation": "这是 D4 B 区头号失分点：外连接后对非保留侧列做 WHERE 过滤 → 退化内连接。条件挪进 ON 后，左表孤行保留、其成绩列仍为 NULL。",
+      "notes": "边界题同时命中 A2（LEFT JOIN 信号）与 B 区失分点，用于检验陷阱辨析触发。条件放 ON 的写法依据教材例5.34（内连接语境）外推到外连接语境，SQL 标准行为，非教材原例，特此说明。"
+    }
+  ],
+  "summary": {
+    "should_trigger_count": 6,
+    "decoy_count": 3,
+    "edge_count": 1,
+    "required_coverage": {
+      "ODBC 分层概念题": "D4-ODBC-01（附答案 B）",
+      "JOIN 行数计算题": "D4-JOIN-02（附答案 10 行 / 8 行）",
+      "兄弟 D3 诱饵": "D4-D3-decoy",
+      "兄弟 D8-安全 诱饵": "D4-D8-decoy",
+      "edge": "D4-edge-01（外连接退化陷阱）"
+    },
+    "self_made_questions_disclosure": "所有题目均基于教材概念；D4-JOIN-02 与 D4-edge-01 的具体数字/语句为基于教材概念自编（教材未给出现成同型数字题），其余题目均出自或直改教材原文与原例。"
+  }
+}

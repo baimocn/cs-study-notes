@@ -1,0 +1,54 @@
+{
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "C/C++: gcc.exe 生成活动文件",
+			"command": "C:\\mingw64\\bin\\gcc.exe",
+			"args": [
+				"-fdiagnostics-color=always",
+				"-g",
+				"${file}",
+				"-o",
+				"${fileDirname}\\${fileBasenameNoExtension}.exe"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "调试器生成的任务。"
+		},
+		{
+			"label": "sqlproj: Build DatabaseProjectQuizDB",
+			"type": "process",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"d:/Desktop/计算机科学与技术/.git/DatabaseProjectQuizDB/DatabaseProjectQuizDB.sqlproj"
+			],
+				"problemMatcher": "$sqlproj-problem-matcher",
+				"isBackground": true,
+				"group": "build",
+				"detail": "生成 DatabaseProjectQuizDB SQL 项目"
+		},
+		{
+			"label": "sqlproj: Build QuizDB",
+			"type": "process",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"d:/Desktop/计算机科学与技术/QuizDB/QuizDB.sqlproj"
+			],
+				"problemMatcher": "$sqlproj-problem-matcher",
+				"isBackground": true,
+				"group": "build",
+				"detail": "生成 QuizDB SQL 项目"
+		}
+	],
+	"version": "2.0.0"
+}

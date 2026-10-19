@@ -1,0 +1,74 @@
+{
+  "unit": "D2-SQL-DDL数据类型",
+  "source_book": "《数据库原理与技术（SQL Server 2012）》",
+  "source_chapters": ["ch03", "ch04"],
+  "distill_date": "2026-09-13",
+  "minimum_pass_rate": 0.8,
+  "should_trigger": [
+    {
+      "id": "d2-t1-create-table-scenario",
+      "type": "建表应用",
+      "prompt": "用 T-SQL 在 student 数据库中创建\"会员\"表：会员号 13 位数字串且可能有前导 0（主键），姓名最长 4 个汉字，是否 VIP 用逻辑值，押金为金额精确到分，办卡时间精确到分钟即可。写出建表语句。",
+      "expected_behavior": "给出正确 CREATE TABLE：会员号 char(13) PRIMARY KEY（不用 int，因前导零与不做算术）、姓名 nchar(4)（汉字选 unicode）、是否VIP bit、押金 money、办卡时间 smalldatetime（精确到分）。语句含 USE student / GO，列间英文逗号。答案要点：①数字串选 char 的理由；②nchar(4) 而非 char(8)；③smalldatetime 而非 datetime 的理由（范围小、精度到分够用）。"
+    },
+    {
+      "id": "d2-t2-type-selection-why",
+      "type": "类型选择",
+      "prompt": "为图书馆管理系统的下列字段选择合适的 SQL Server 数据类型并说明理由：①身份证号（18 位）；②是否欠费；③罚款金额；④借书日期（记录到日期）；⑤累计借书量（不超过 200）。",
+      "expected_behavior": "①char(18)——不做算术的数字串、可能有 X 结尾与前导零；②bit——只有 0/1/NULL 三个取值；③money（或 decimal(p,s)）——精确小数，绝不能用 float/real；④借书日期只需精确到日：首选 date（SQL Server 2012 支持 date 类型，只含日期、精确到日）；若按教材口径答题选 smalldatetime（范围 1900-01-01 到 2079-06-06、精确到分，覆盖日期需求、存储省）同样成立，但必须写明所选类型的时间范围与精度，并说明与题面'记录到日期'的匹配理由——切勿把 date/datetime/smalldatetime 三者混为一谈或含糊带过；⑤tinyint——0~255 覆盖 200，仅 1 字节。禁止出现：身份证用 int/bigint、金额用 float。（本④为阶段4验收建议整改：原表述 date/datetime/smalldatetime 纠缠不清，已重写为清晰判据）"
+    },
+    {
+      "id": "d2-t3-create-database",
+      "type": "建库DDL",
+      "prompt": "写出创建数据库 teacher2 的 T-SQL 语句：主数据文件逻辑名 teacher2_data，初始 8MB，每次自动增长 2MB，最大 80MB，存放在 D:\\t2；日志文件逻辑名 teacher2_log，初始 2MB，按 10% 增长，最大 20MB。",
+      "expected_behavior": "CREATE DATABASE teacher2 ON PRIMARY(NAME=teacher2_data, FILENAME='D:\\t2\\teacher2_data.mdf', SIZE=8MB, MAXSIZE=80MB, FILEGROWTH=2MB) LOG ON(NAME=teacher2_log, FILENAME='D:\\t2\\teacher2_log.ldf', SIZE=2MB, MAXSIZE=20MB, FILEGROWTH=10%)。五件套齐全、数据文件在 ON、日志在 LOG ON、扩展名 .mdf/.ldf 正确。"
+    },
+    {
+      "id": "d2-t4-alter-table",
+      "type": "ALTER表",
+      "prompt": "在\"学生\"表中：①增加一列\"电话\"，类型 varchar(15)；②把\"电话\"列改为 char(11) 且不允许为空；③删除\"电话\"列。分别写出语句。",
+      "expected_behavior": "①ALTER TABLE 学生 ADD 电话 varchar(15)；②ALTER TABLE 学生 ALTER COLUMN 电话 char(11) NOT NULL；③ALTER TABLE 学生 DROP COLUMN 电话。三板斧对应正确：ADD/ALTER COLUMN/DROP COLUMN，ALTER COLUMN 后要跟新类型定义。"
+    },
+    {
+      "id": "d2-t5-storage-calc",
+      "type": "存储计算",
+      "prompt": "某数据表包含 20000 行数据，每行 5000 字节。该表大约需要多少 MB 存储空间？其中约有多少 MB 是浪费的？说明计算依据。",
+      "expected_behavior": "依据\"页 8KB、其中 8060B 存数据、行不能跨页\"：每页 8060B 只能装 1 行（2×5000=10000>8060），需 20000 页，空间 = 20000×8KB ≈ 156MB；每页浪费 8060-5000=3060B，共浪费 20000×3060B ≈ 58MB。"
+    },
+    {
+      "id": "d2-t6-judge-errors",
+      "type": "判断改错",
+      "prompt": "判断下列说法正误并改错：①事务日志文件可以和主数据文件放在同一个文件组；②一个数据库可以有多个主数据文件；③IDENTITY 列的值可以由用户手工插入；④用 ALTER DATABASE … MODIFY FILE 可以把数据文件初始容量从 10MB 改为 5MB；⑤NULL 就是 0。",
+      "expected_behavior": "①错——日志文件不属于任何文件组；②错——主数据文件(.mdf)有且只能有一个；③错——IDENTITY 列默认不许用户插值/更新（除非 SET IDENTITY_INSERT ON）；④错——MODIFY FILE 只能改大不能改小，缩小要用 DBCC SHRINKDATABASE/SHRINKFILE；⑤错——NULL 既不是 0 也不是空格，表示未输入或明确插入 NULL。"
+    }
+  ],
+  "should_not_trigger": [
+    {
+      "id": "d2-decoy-constraints",
+      "type": "应指向D1",
+      "prompt": "实体完整性、参照完整性和用户定义完整性分别由哪些约束实现？外键约束被违反时会发生什么？",
+      "expected_behavior": "这是完整性约束语义问题，归属 D1 单元。D2 只覆盖约束在建表语句中的语法位置；完整性分类、级联规则、约束语义原理应路由到 D1。"
+    },
+    {
+      "id": "d2-decoy-query",
+      "type": "应指向D3",
+      "prompt": "查询\"学生\"表中 1995 年以后出生的所有女生的姓名和班级代码，按学号排序，这条 SELECT 语句怎么写？",
+      "expected_behavior": "纯查询题，归属 D3。即使涉及 student 库的学生表（D2 例题中的表），SELECT/WHERE/ORDER BY 语法不归 D2 管，应路由到 D3。"
+    },
+    {
+      "id": "d2-decoy-view-index",
+      "type": "应指向D5/D7",
+      "prompt": "如何在 SQL Server 2012 中创建一个视图来简化多表查询？CREATE VIEW 语句的语法格式是什么？索引有什么作用，怎么建立？",
+      "expected_behavior": "视图与索引的创建语法归属 D5/D7。D2 只在数据库对象名词层面提到视图和索引，不覆盖其 CREATE/ALTER/DROP 语法，应路由到对应单元。"
+    }
+  ],
+  "edge": [
+    {
+      "id": "d2-edge-table-structure-ambiguous",
+      "type": "结构推断边界",
+      "prompt": "给一张只有字段中文名和用途描述的表结构（如\"班级代码：用来唯一标识一个班，共 9 位\"），没有指定数据类型，怎么确定每列的类型和长度？",
+      "expected_behavior": "边缘情形：题目未给类型，需用 D2 的四判据推断并说明理由，而不是照抄。班级代码→char(9)（9 位数字串、定长、做主键）。合理输出：先按判据逐一推断，再对推断结果标注\"依据\"；若信息不足（如不知道是否含汉字），应指出需向题面确认而非瞎猜。"
+    }
+  ],
+  "notes": "阶段5整改记录：①结构对齐 D1/D3 schema——补 unit/source_book/source_chapters/distill_date 字段；原 cases 单数组按触发类型拆为 should_trigger/should_not_trigger/edge 三个数组（与 D1 结构对齐）；原 item 字段 query 改名为 prompt（题面文字逐字未动），题干与 expected_behavior 的答案语义未改；内部 type 由触发类别改为题型标签，触发类别改由所属数组表达。②d2-t2 第四点按阶段4验收建议整改重写为清晰判据，原文痕迹记于此。"
+}

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>人工智能与大数据 · 知识图谱</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#fafbfc;font-family:"Microsoft YaHei",sans-serif}
+  #bar{position:fixed;top:12px;right:16px;z-index:10;display:flex;gap:8px}
+  #bar button{border:1px solid #c8ccd0;background:#fff;border-radius:6px;padding:6px 12px;font-size:13px;cursor:pointer;color:#333}
+  #bar button:hover{background:#eef2f6}
+  #hint{position:fixed;bottom:12px;left:16px;font-size:12px;color:#98a2ad;z-index:10}
+  svg{cursor:grab;display:block;width:100vw;height:100vh}
+  svg.drag{cursor:grabbing}
+  text{user-select:none}
+</style>
+</head>
+<body>
+<div id="bar">
+  <button onclick="fitAll()">适应窗口</button>
+  <button onclick="setAll(true)">全部展开</button>
+  <button onclick="setAll(false)">全部折叠</button>
+</div>
+<div id="hint">滚轮缩放 · 拖拽平移 · 点击节点折叠/展开</div>
+<svg id="svg"></svg>
+<script>
+const DATA = {"t": "人工智能与大数据\n知识树", "c": [{"t": "人工智能概论", "c": [{"t": "概念与层级", "c": [{"t": "AI的定义：用计算机模拟人类的智能行为——学习、推理、感知、决策", "c": []}, {"t": "三层包含：AI ⊃ 机器学习 ⊃ 深度学习——AI是宏大目标，机器学习是当前主流实现手段，深度学习是机器学习的一个分支", "c": []}, {"t": "弱AI与强AI", "c": [{"t": "弱AI：只会一件事，〔AlphaGo下棋、Siri对话、FaceID刷脸〕——现实中所有AI都是弱AI", "c": []}, {"t": "强AI：像人一样通用思考、有自我意识——目前只存在于设想", "c": []}]}, {"t": "AI成熟度三层次：感知层(看懂听懂) → 认知层(理解思考) → 执行层(动手做事)", "c": []}]}, {"t": "发展脉络", "c": [{"t": "三大驱动：数据(燃料) + 算力(GPU发动机) + 算法(方法论)", "c": []}, {"t": "里程碑：2016 AlphaGo胜李世石——机器在最难博弈中取胜；2017胜柯洁——深度学习走向大众", "c": []}, {"t": "产业现状：2024年我国AI核心产业规模突破6000亿元；学术界约80%顶会论文用PyTorch", "c": []}, {"t": "国家政策：2025年国务院《关于深入实施\"人工智能+\"行动的意见》", "c": []}]}, {"t": "产业链三层", "c": [{"t": "基础层：提供算力与感知硬件", "c": [{"t": "芯片：AI的大脑、核心运算载体", "c": [{"t": "GPU：通用并行计算，训练端市占率超70%", "c": []}, {"t": "TPU：谷歌专为机器学习定制的芯片", "c": []}, {"t": "ASIC：为单一任务定制的专用芯片，〔苹果A11神经引擎〕", "c": []}, {"t": "FPGA 与类脑芯片", "c": []}]}, {"t": "传感器：AI的五官——视觉/声觉/距离/触觉力觉", "c": []}, {"t": "云计算：提供弹性可扩展的存储与算力", "c": []}, {"t": "现状：基础层核心技术最薄弱，需自主研发", "c": []}]}, {"t": "技术层：核心算法能力——机器学习 / 计算机视觉 / 语音与自然语言处理", "c": []}, {"t": "应用层：落地场景——安防 / 金融 / 智慧医疗 / 自动驾驶", "c": []}]}, {"t": "感知智能应用", "c": [{"t": "语音识别：中文识别准确率已达97%", "c": []}, {"t": "人脸识别：1:1=证明\"你是你\"(刷脸解锁)；1:N=在海量人像库中检索身份", "c": []}, {"t": "自动驾驶：ADAS=高级驾驶辅助系统(尚未完全无人)；技术栈=高精地图+环境感知+智能决策", "c": []}]}]}, {"t": "大数据技术", "c": [{"t": "是什么", "c": [{"t": "4V特征", "c": [{"t": "Volume 数据量大：〔中国移动每天产生PB级话单〕", "c": []}, {"t": "Velocity 产生与处理速度快：要求实时响应", "c": []}, {"t": "Variety 类型杂：结构化与非结构化并存", "c": []}, {"t": "Value 价值密度低但总量价值高：〔几小时监控里只有几秒有用〕", "c": []}]}, {"t": "数据形态", "c": [{"t": "结构化：行列规整，〔数据库表、Excel〕", "c": []}, {"t": "半结构化：有标签但无严格表结构，〔JSON〕", "c": []}, {"t": "非结构化：自由格式，〔视频、图片、文档〕", "c": []}]}, {"t": "来源：互联网 + 物联网 + 公共与业务系统", "c": []}]}, {"t": "计算模式", "c": [{"t": "批量计算：先攒一批再算，准但慢，〔月度报表〕", "c": []}, {"t": "流式计算：数据到达立即计算，〔双十一实时成交额〕；特点=实时/易失/突发/无限", "c": []}, {"t": "ETL：抽取→转换→加载，数据入库前的清洗管道", "c": []}]}, {"t": "技术三件套", "c": [{"t": "Hadoop：离线大数据基石 = HDFS分布式存储 + MapReduce分布式计算，生态含HBase/Hive", "c": []}, {"t": "Spark：基于内存的计算引擎，比Hadoop快约100倍", "c": []}, {"t": "Kafka：流式数据\"高速公路\"，在生产与消费之间缓冲，解决速度不匹配", "c": []}]}, {"t": "数据思维", "c": [{"t": "信度：数据准不准；效度：数据是否贴合要描述的对象——两者是数据质量的两个维度", "c": []}, {"t": "漏斗思维：层层转化看流失，核心环节不超过5个", "c": []}, {"t": "逻辑树思维：把大问题逐层拆成小问题——在算法界的具象就是决策树", "c": []}, {"t": "指数化思维：拆解要MECE——相互独立、完全穷尽", "c": []}, {"t": "时间序列思维：重视近期 / 周期同比 / 关注异常", "c": []}, {"t": "数据交易三难点：隐私保护 / 所有权界定模糊 / 使用合法性", "c": []}, {"t": "商用四阶段：数据化 → 算法化 → 应用化 → 生态化", "c": []}, {"t": "PageRank：按链接数量与质量给网页打分，谷歌搜索的起点", "c": []}]}]}, {"t": "机器学习", "c": [{"t": "是什么：不写死规则，让机器从大量样本中自动总结规律，再用规律预测新数据", "c": []}, {"t": "学习范式（按有无标签划分）", "c": [{"t": "监督学习：训练数据带\"标准答案\"，学习输入→输出的映射", "c": [{"t": "回归：预测连续数值，〔房价、气温〕", "c": [{"t": "线性回归：y = a₀ + a₁·x，用一条直线拟合数据", "c": []}, {"t": "MSE均方误差：误差平方的均值，越小拟合越好", "c": []}]}, {"t": "分类：预测离散类别，〔是不是垃圾邮件〕", "c": [{"t": "逻辑回归：名字带回归实为分类；Sigmoid把任意数压成(0,1)的概率，≥0.5判为正类", "c": []}, {"t": "KNN：看最近的K个邻居多数投票\"随大流\"；缺点=慢/维度灾难/吃内存", "c": []}, {"t": "决策树：像\"20个问题\"游戏层层判断；叶节点=最终结论；直观、免归一化、能处理非线性", "c": []}, {"t": "SVM：找让两类间隔最大的分界线；线性分不开时→核函数把数据映射到高维再切", "c": []}, {"t": "集成学习：三个臭皮匠顶个诸葛亮", "c": [{"t": "随机森林：许多棵决策树独立投票；样本有放回随机 + 特征随机 = 双重随机保证多样性", "c": []}, {"t": "AdaBoost：串行训练，每个新模型专攻前面模型做错的样本", "c": []}]}]}]}, {"t": "无监督学习：没有标签，自己发现结构", "c": [{"t": "聚类：物以类聚自动分组，〔客户分群〕；算法=K-Means/层次/DBSCAN/谱聚类", "c": []}, {"t": "降维：压缩特征数量、保留主要信息", "c": []}]}, {"t": "迁移学习：把A任务学到的本事用于相关的B任务，不必从零开始", "c": []}, {"t": "强化学习：试错+奖励，学出最优策略，〔游戏AI〕", "c": []}]}, {"t": "怎么训练", "c": [{"t": "模型与算法：模型=数学结构，算法=求参数的方法；一个模型可配多种算法", "c": []}, {"t": "训练本质：找一组参数，让模型在没见过的新数据上误差最小（不是背题库）", "c": []}, {"t": "梯度下降：沿\"下坡最陡\"方向(负梯度)一步步走到损失最低点", "c": [{"t": "三种形式：BGD全量(稳但慢) / SGD单样本(快但抖) / MBGD小批量折中(主流)", "c": []}, {"t": "学习率=步长：太大→跨过谷底来回震荡不收敛；太小→收敛极慢", "c": []}]}]}, {"t": "泛化能力（举一反三的本事）", "c": [{"t": "欠拟合 = 高偏差：训练测试都差→学不动→换更复杂模型/加特征/延长训练", "c": []}, {"t": "过拟合 = 高方差：训练好测试差→死记硬背→更多数据/正则化/早停", "c": [{"t": "L1正则化(Lasso)：惩罚|w|→把不重要权重压成0→顺带完成特征选择", "c": []}, {"t": "L2正则化(岭回归)：惩罚w²→权重整体变小趋0但不为0→模型更平滑", "c": []}]}]}, {"t": "怎么评估", "c": [{"t": "分类", "c": [{"t": "混淆矩阵四格：TP预测正且真 / FP预测正实为负 / FN漏掉的正例 / TN预测负且真", "c": []}, {"t": "精确率 = TP/(TP+FP)：报出来的有多少是真的(查准)", "c": []}, {"t": "召回率 = TP/(TP+FN)：该抓的抓住了多少(查全)；两者此消彼长", "c": []}, {"t": "F1：精确率与召回率的调和平均，被较小一方拖低", "c": []}, {"t": "AUC：0.5=瞎猜，越接近1越好", "c": []}]}, {"t": "回归：MSE / MAE（准确率、F1不适用于回归）", "c": []}]}]}, {"t": "深度学习", "c": [{"t": "是什么：用多层神经网络自动学习特征的机器学习；核心优势=不靠人工设计特征", "c": []}, {"t": "挑战：依赖海量标注数据 / 黑箱难解释 / 消耗大量算力", "c": []}, {"t": "网络结构", "c": [{"t": "神经元：加权求和 + 激活函数输出", "c": []}, {"t": "连接模式：全连接 / 局部连接 / 循环连接", "c": []}, {"t": "激活函数：引入非线性——没有它，再深的网络也等价于一条直线", "c": [{"t": "ReLU = max(0,x)：简单高效，当前最常用", "c": []}, {"t": "Sigmoid：压到(0,1)；Tanh：压到(-1,1)", "c": []}, {"t": "Softmax：多分类输出层专用，把得分变成概率分布，总和=1", "c": []}]}]}, {"t": "怎么训练：四步循环", "c": [{"t": "前向传播：数据流过网络得到预测", "c": []}, {"t": "计算损失：量化预测与答案的差距", "c": []}, {"t": "反向传播：从损失往回推每个参数的梯度", "c": []}, {"t": "参数更新：按梯度+学习率调整参数", "c": []}, {"t": "优化技巧：Mini-Batch / 数据标准化 / Momentum动量 / Adam自适应", "c": []}, {"t": "BatchNorm：稳定每层输入分布→加速收敛（不是防过拟合）", "c": []}, {"t": "防过拟合：Dropout随机关闭部分神经元 / 早停 / 数据增强", "c": []}]}, {"t": "表示学习", "c": [{"t": "One-Hot：类别变0/1向量——简单但高维稀疏，且不体现语义", "c": []}, {"t": "Embedding：把稀疏高维映射为低维稠密向量，意思相近的向量也相近，〔国王-男人≈女王-女人〕", "c": []}]}, {"t": "典型网络", "c": [{"t": "CNN：擅长图像；两大减参机制=权值共享(同一检测器全图复用)+局部感受野(只看局部)", "c": []}, {"t": "RNN：带记忆的循环结构，擅文本语音等序列；LSTM/GRU=加了选择性记忆闸门，解决长序列遗忘", "c": []}]}, {"t": "工具生态", "c": [{"t": "TensorFlow：谷歌框架，理念=定义与运行分离；四层架构=硬件/C++引擎/Python接口/高层API；tf.estimator属于高层API", "c": []}, {"t": "Pandas：Series=一维带标签数组，DataFrame=二维表格", "c": []}, {"t": "Anaconda：Python一站式平台=包管理+虚拟环境", "c": []}]}]}, {"t": "特征工程", "c": [{"t": "是什么：把原始数据加工成模型更好消化的特征——数据和特征决定模型上限", "c": []}, {"t": "特征交叉：把两三个特征组合出新特征，〔性别×年龄段〕", "c": [{"t": "风险：组合数指数爆炸=维度灾难", "c": []}, {"t": "对策：特征哈希(压到固定低维省内存) / 限制交叉阶数 / 统计过滤", "c": []}]}, {"t": "特征编码", "c": [{"t": "One-Hot：类别转向量", "c": []}, {"t": "分箱：连续值切成段，便于参与交叉", "c": []}, {"t": "Embedding：高维稀疏→低维稠密（见深度学习·表示学习）", "c": []}]}]}, {"t": "知识图谱", "c": [{"t": "是什么：把知识表示成\"节点+边\"的语义网络，机器可读、可推理", "c": []}, {"t": "三元组：知识的最小单位", "c": [{"t": "(实体, 关系, 实体)，〔(姚明, 效力于, NBA)〕", "c": []}, {"t": "(实体, 属性, 属性值)，〔(姚明, 身高, 2.26米)〕", "c": []}, {"t": "辨析：（中国, 首都, 北京）中\"首都\"是关系，不是属性", "c": []}]}, {"t": "逻辑架构：数据层(具体事实) + 模式层(规则约束)", "c": []}, {"t": "构建四步：知识提取 → 知识融合(核心=实体对齐：认出\"NBA\"与\"美职篮\"是同一实体) → 知识加工 → 知识呈现", "c": []}, {"t": "典型应用：智能问答 / 语义搜索", "c": []}]}, {"t": "数据挖掘", "c": [{"t": "是什么：从大量数据中挖出隐含的、事先未知的模式", "c": []}, {"t": "两大任务：预测(推断未来) + 描述(呈现现有规律)", "c": []}, {"t": "方法", "c": [{"t": "分类(有标签) ⇔ 聚类(无标签)：前者学出规则，后者自动分组", "c": []}, {"t": "关联规则：发现\"A出现常伴随B\"；两个指标=支持度(组合出现的频率)+置信度(A出现时B出现的概率)；经典案例\"啤酒与尿布\"", "c": []}, {"t": "回归分析：找变量间的数量关系", "c": []}]}]}, {"t": "行业落地", "c": [{"t": "金融", "c": [{"t": "工行两库：数据仓库管结构化交易数据 + 信息库攻非结构化数据难题", "c": []}, {"t": "平台选型：数据量100TB以上选MPP架构(多节点并行查询)", "c": []}, {"t": "场景：智能风控 / 秒贷(信用秒批) / 智能投顾", "c": []}, {"t": "复杂网络建模征信数据 → 识别信贷担保圈的系统性风险", "c": []}, {"t": "建设理念：业务为本、应用为先——技术为创造业务价值服务", "c": []}]}, {"t": "医疗", "c": [{"t": "特征：时序性强(病历跨数年) / 隐私敏感 / 需长期保存 / 价值密度低", "c": []}, {"t": "AI三大方向：行业治理 / 临床科研 / 公共卫生", "c": []}, {"t": "场景：全科辅助诊疗(覆盖500+疾病、准确率96%) / 影像筛查 / 慢病管理", "c": []}]}, {"t": "公安", "c": [{"t": "3S特色：超复杂性 / 超保密性 / 超高速性（4V之外的行业特有）", "c": []}, {"t": "\"可用不可见\"：数据能算不能用——原始数据不出库，只输出计算结果", "c": []}]}, {"t": "政府：数据孤岛 / 管理滞后 / 应用浅层化 / 标准缺失", "c": []}, {"t": "智能制造", "c": [{"t": "核心路径：自动化 → 数据化 → 智能化", "c": []}, {"t": "三大系统：感知系统(传感器=五官) / 大脑(大数据+AI) / 装备手段(工业机器人=四肢)", "c": []}]}]}, {"t": "关键数字速记", "c": [{"t": "97%=中文语音识别准确率；96%/500种=全科AI辅助诊疗", "c": []}, {"t": "6000亿=2024 AI核心产业规模；80%=PyTorch顶会占比", "c": []}, {"t": "70%=GPU训练端市占率；100倍=Spark比Hadoop；100TB=MPP架构门槛", "c": []}, {"t": "0.5=逻辑回归默认阈值与AUC随机基线；≤5=漏斗核心环节上限", "c": []}]}]};
+
+const svg = document.getElementById('svg');
+const NS = 'http://www.w3.org/2000/svg';
+const GAPX = 70, GAPY = 14, LINEH = 19, PADX = 12, PADY = 8, MAXCHARS = 24;
+const COLORS = ['#1f77b4','#d62728','#2ca02c','#9467bd','#ff7f0e','#8c564b','#17becf','#bcbd22','#e377c2','#7f7f7f'];
+
+function wrap(t){
+  const lines = [];
+  for (const seg of t.split('\n')){
+    let cur = '';
+    for (const ch of seg){
+      cur += ch;
+      const w = [...cur].reduce((a,c)=>a+(c.charCodeAt(0)>255?1:0.55),0);
+      if (w >= MAXCHARS){ lines.push(cur); cur=''; }
+    }
+    lines.push(cur);
+  }
+  return lines.slice(0,6);
+}
+
+function measure(node, depth){
+  const lines = wrap(node.t);
+  node._lines = lines;
+  node._fs = depth===0?22:depth===1?17:13.5;
+  node._w = Math.max(...lines.map(l=>[...l].reduce((a,c)=>a+(c.charCodeAt(0)>255?node._fs:node._fs*0.55),0))) + PADX*2;
+  node._h = lines.length*(node._fs+4) + PADY*2 - 4;
+}
+
+let nodes = [];
+function layout(node, depth, x, colorIdx){
+  measure(node, depth);
+  node._x = x;
+  node._depth = depth;
+  node._color = depth===0 ? '#24292e' : COLORS[colorIdx % COLORS.length];
+  node._collapsed = depth >= 3;
+  let blockH;
+  if (!node.c || !node.c.length){ blockH = node._h; }
+  else {
+    let sum = (node.c.length-1)*GAPY;
+    node.c.forEach(ch => sum += ch._sub === undefined ? 0 : 0); // placeholder
+    // recursive
+  }
+  return blockH;
+}
+
+// proper recursive layout
+function calcSub(node, depth){
+  measure(node, depth);
+  if (node._collapsed === undefined) node._collapsed = depth >= 3;
+  if (!node.c || !node.c.length || node._collapsed){ node._sub = node._h; }
+  else {
+    let sum = (node.c.length-1)*GAPY;
+    for (const ch of node.c) sum += calcSub(ch, depth+1);
+    node._sub = Math.max(node._h, sum);
+  }
+  return node._sub;
+}
+calcSub(DATA, 0);
+
+function assign(node, depth, x, top, colorIdx){
+  node._x = x;
+  node._depth = depth;
+  if (depth === 0) node._color = '#24292e';
+  else if (depth === 1) node._color = COLORS[colorIdx % COLORS.length];
+  else node._color = node._pcolor || COLORS[colorIdx % COLORS.length];
+  node._pcolor = node._color;
+  const cy = top + node._sub/2;
+  node._y = cy - node._h/2;
+  if (node.c && node.c.length && !node._collapsed){
+    let y = top;
+    node.c.forEach((ch, i) => {
+      ch._parent = node;
+      assign(ch, depth+1, x + node._w + GAPX, y, depth===0 ? i : colorIdx);
+      y += ch._sub + GAPY;
+    });
+  }
+}
+assign(DATA, 0, 0, 0, 0);
+
+function visible(node, out){
+  out.push(node);
+  if (node.c && node.c.length && !node._collapsed)
+    for (const ch of node.c) visible(ch, out);
+  return out;
+}
+
+function render(){
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  const g = document.createElementNS(NS,'g');
+  const shown = visible(DATA, []);
+  // links
+  for (const n of shown){
+    if (n._parent && n._parent._x !== undefined){
+      const p = n._parent;
+      const x1 = p._x + p._w, y1 = p._y + p._h/2;
+      const x2 = n._x, y2 = n._y + n._h/2;
+      const mx = (x1+x2)/2;
+      const path = document.createElementNS(NS,'path');
+      path.setAttribute('d', `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`);
+      path.setAttribute('fill','none');
+      path.setAttribute('stroke', n._pcolor || '#bbb');
+      path.setAttribute('stroke-width','1.6');
+      path.setAttribute('opacity','0.55');
+      g.appendChild(path);
+    }
+  }
+  // nodes
+  for (const n of shown){
+    const grp = document.createElementNS(NS,'g');
+    const rect = document.createElementNS(NS,'rect');
+    rect.setAttribute('x', n._x); rect.setAttribute('y', n._y);
+    rect.setAttribute('width', n._w); rect.setAttribute('height', n._h);
+    rect.setAttribute('rx', 8);
+    rect.setAttribute('fill', n._depth===0 ? '#24292e' : '#ffffff');
+    rect.setAttribute('stroke', n._depth<=1 ? n._color : '#d5dae0');
+    rect.setAttribute('stroke-width', n._depth<=1 ? 2 : 1.2);
+    rect.style.filter = 'drop-shadow(0 1px 2px rgba(0,0,0,0.08))';
+    grp.appendChild(rect);
+    const text = document.createElementNS(NS,'text');
+    text.setAttribute('x', n._x + PADX);
+    text.setAttribute('y', n._y + PADY + n._fs);
+    text.setAttribute('font-size', n._fs);
+    text.setAttribute('fill', n._depth===0 ? '#fff' : '#2b3137');
+    if (n._depth===1) text.setAttribute('font-weight','bold');
+    n._lines.forEach((l,i)=>{
+      const ts = document.createElementNS(NS,'tspan');
+      ts.setAttribute('x', n._x + PADX);
+      if (i>0) ts.setAttribute('dy', n._fs+4);
+      ts.textContent = l;
+      text.appendChild(ts);
+    });
+    grp.appendChild(text);
+    if (n.c && n.c.length){
+      // collapse indicator
+      const dot = document.createElementNS(NS,'circle');
+      const hasHidden = n._collapsed;
+      dot.setAttribute('cx', n._x + n._w + 4);
+      dot.setAttribute('cy', n._y + n._h/2);
+      dot.setAttribute('r', hasHidden ? 8 : 3.5);
+      dot.setAttribute('fill', hasHidden ? (n._pcolor||n._color) : '#c3cad2');
+      if (hasHidden){
+        const cnt = document.createElementNS(NS,'text');
+        cnt.setAttribute('x', n._x + n._w + 4);
+        cnt.setAttribute('y', n._y + n._h/2 + 3.5);
+        cnt.setAttribute('font-size','9');
+        cnt.setAttribute('fill','#fff');
+        cnt.setAttribute('text-anchor','middle');
+        cnt.textContent = countDesc(n);
+        grp.appendChild(cnt);
+      }
+      grp.appendChild(dot);
+    }
+    if (n.c && n.c.length){
+      grp.style.cursor = 'pointer';
+      grp.addEventListener('click', e => {
+        e.stopPropagation();
+        n._collapsed = !n._collapsed;
+        relayout();
+      });
+    }
+    g.appendChild(grp);
+  }
+  svg.appendChild(g);
+  applyTransform();
+}
+
+function countDesc(n){
+  let c = 0;
+  (function walk(x){ for(const ch of (x.c||[])){ c++; if(x._collapsed||true) walk(ch);} })(n);
+  return c > 99 ? '99+' : c;
+}
+
+function relayout(){
+  DATA._collapsed = false;
+  nodes = [];
+  // reset subtree
+  (function reset(n){ n._sub = undefined; (n.c||[]).forEach(reset); })(DATA);
+  calcSub(DATA, 0);
+  assign(DATA, 0, 0, 0, 0);
+  render();
+}
+
+// ---- pan & zoom ----
+let tx = 60, ty = 60, scale = 1;
+function applyTransform(){
+  const g = svg.firstChild;
+  if (g) g.setAttribute('transform', `translate(${tx},${ty}) scale(${scale})`);
+}
+svg.addEventListener('wheel', e => {
+  e.preventDefault();
+  const k = e.deltaY < 0 ? 1.15 : 1/1.15;
+  const rect = svg.getBoundingClientRect();
+  const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+  tx = cx - (cx - tx) * k;
+  ty = cy - (cy - ty) * k;
+  scale *= k;
+  applyTransform();
+}, {passive:false});
+let dragging = false, lx=0, ly=0;
+svg.addEventListener('mousedown', e => { dragging = true; lx=e.clientX; ly=e.clientY; svg.classList.add('drag'); });
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  tx += e.clientX - lx; ty += e.clientY - ly; lx=e.clientX; ly=e.clientY;
+  applyTransform();
+});
+window.addEventListener('mouseup', () => { dragging = false; svg.classList.remove('drag'); });
+
+// 按宽度适配并限制最小缩放,保证文字可读;停在树的顶部
+function fit(){
+  relayout();
+  const bbox = g0bbox();
+  const W = window.innerWidth;
+  scale = Math.min(W/bbox.w, 1.1) * 0.95;
+  if (scale < 0.5) scale = 0.5;
+  tx = (W - bbox.w*scale)/2 - bbox.x*scale;
+  if (tx > 40) tx = 40;
+  ty = 24;
+  applyTransform();
+}
+// 整卷概览:强行缩放到全图可见
+function fitAll(){
+  relayout();
+  const bbox = g0bbox();
+  const W = window.innerWidth, H = window.innerHeight;
+  scale = Math.min(W/bbox.w, H/bbox.h, 1.1) * 0.95;
+  tx = (W - bbox.w*scale)/2 - bbox.x*scale;
+  ty = (H - bbox.h*scale)/2 - bbox.y*scale;
+  applyTransform();
+}
+function g0bbox(){
+  const shown = visible(DATA, []);
+  let minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
+  for (const n of shown){
+    minX = Math.min(minX, n._x); minY = Math.min(minY, n._y);
+    maxX = Math.max(maxX, n._x+n._w); maxY = Math.max(maxY, n._y+n._h);
+  }
+  return {x:minX,y:minY,w:maxX-minX,h:maxY-minY};
+}
+function setAll(open){
+  (function walk(n){ if(n._depth>0) n._collapsed = !open; (n.c||[]).forEach(walk); })(DATA);
+  relayout(); fit();
+}
+window.addEventListener('resize', fit);
+render(); fit();
+</script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+{
+  "unit": "C8-文件",
+  "source_book": "《高级语言程序设计（2017年版）》郑岩",
+  "source_chapter": "ch10",
+  "minimum_pass_rate": 0.8,
+  "triggers": [
+    {
+      "id": "T1",
+      "type": "single_choice",
+      "topic": "fopen 模式串选择",
+      "stem": "若用 fopen() 函数打开一个新的二进制文件，要求该文件只能写入，则文件的使用方式字符串应为（ ）\nA. \"ab\"  B. \"wb\"  C. \"rb\"  D. \"ab+\"",
+      "answer": "B",
+      "explanation": "新文件→w（不存在则自动创建）；二进制→b；只能写→不带 +。a 是追加须文件已存在（且 ab 只能写但语义是追加）；rb 只读；ab+ 可读可写。口诀：读 r 写 w 添 a 追加，加 + 能读写，加 b 变二进制。"
+    },
+    {
+      "id": "T2",
+      "type": "fill_blank",
+      "topic": "fseek 计算位置",
+      "stem": "设二进制文件 stud.dat 中依次存放 10 个学生的信息，每个学生信息占 sizeof(struct STU) 字节。要将文件位置指针定位到第 6 个学生数据的起始位置，应执行语句：fseek(fp, ______, 0);（请写出完整的第二个参数表达式）",
+      "answer": "5L*sizeof(struct STU) 或 (long)5*sizeof(struct STU)",
+      "explanation": "第 6 个学生前面有 5 个学生，从文件头（0=SEEK_SET）后移 5 个记录长度；位移量必须长整型，常数 5 要写 5L（或用 (long) 强转）。通用公式：第 n 个记录 = (n-1)*sizeof(类型)。"
+    },
+    {
+      "id": "T3",
+      "type": "read_program",
+      "topic": "w 清空 + a 追加 + rewind 回读",
+      "stem": "阅读程序，写出输出结果：\n#include <stdio.h>\nint main(void)\n{\n    FILE *fp;\n    char s[10];\n    fp=fopen(\"text.dat\",\"w\");\n    fputs(\"welcome\",fp);\n    fclose(fp);\n    fp=fopen(\"text.dat\",\"a+\");\n    fprintf(fp,\"%d\",55);\n    rewind(fp);\n    fscanf(fp,\"%s\",s);\n    puts(s);\n    fclose(fp);\n    return 0;\n}",
+      "answer": "welcome55",
+      "explanation": "第二段用 a+ 打开：内容保留，fprintf 在尾部追加 55；rewind 把位置指针拨回文件头后 fscanf 从头读入整个字符串 welcome55，puts 输出。若第二段误用 w+ 则先清空，输出只剩 55——w 清空与 a 追加是本单元第一大坑。"
+    },
+    {
+      "id": "T4",
+      "type": "read_program",
+      "topic": "fseek 从文件尾倒数定位",
+      "stem": "阅读程序，写出输出结果：\n#include <stdio.h>\nint main(void)\n{\n    FILE *fp;\n    int i;\n    char a[4]={'a','b','c','d'}, b;\n    fp=fopen(\"text.dat\",\"wb\");\n    for(i=0;i<4;i++)\n        fwrite(&a[i],sizeof(char),1,fp);\n    fclose(fp);\n    fp=fopen(\"text.dat\",\"rb\");\n    fseek(fp,-3L*sizeof(char),SEEK_END);\n    fread(&b,sizeof(char),1,fp);\n    fclose(fp);\n    printf(\"%c\\n\",b);\n    return 0;\n}",
+      "answer": "b",
+      "explanation": "文件里依次是 a、b、c、d 共 4 字节。SEEK_END=2 从文件尾起算，-3L*sizeof(char) 前移 3 字节落在第 2 个字符 b 上（4-3=1，从 0 数第 1 个），fread 读出 b。负位移+SEEK_END 是随机读的固定套路。"
+    },
+    {
+      "id": "T5",
+      "type": "short_answer",
+      "topic": "文本文件 vs 二进制文件差异",
+      "stem": "简答：C 语言中文本文件与二进制文件在存储形式上有什么区别？各有什么优缺点？对二进制文件进行读操作时，判断文件尾应使用什么方法？",
+      "answer": "文本文件把数据转换为对应的 ASCII 码存放，每字节存一个字符，便于逐字符处理，但占用空间多且需要二进制与 ASCII 之间的转换时间；二进制文件把内存中的数据按其二进制形式原样存放，节省存储空间和转换时间，但 1 字节不对应一个字符，不能直接按字符形式输出。对二进制文件判文件尾必须使用 feof() 函数（遇到文件尾返回非 0）；EOF 判据只适用于文本文件。",
+      "explanation": "教材 P310 存储形式对比 + P315 feof 说明。例：int a=10000，文本文件存 5 个 ASCII 字符字节，二进制文件按内存原样存放。"
+    },
+    {
+      "id": "T6",
+      "type": "fill_blank",
+      "topic": "文件操作骨架与返回值",
+      "stem": "填空：①文件操作的三步通常是打开、读/写操作和______；②符号常量 EOF 的值为______；③函数 fscanf(fp,\"%d\",&x) 执行成功时返回值为______，执行失败时返回值为______；④fclose(fp) 成功关闭文件时返回值为______。",
+      "answer": "①关闭 ②-1 ③已读入的数据个数 ④EOF ⑤0",
+      "explanation": "骨架题：打开→读写→关闭；EOF 在 stdio.h 中定义为 -1；fscanf 返回读入数据个数、失败返回 EOF；fclose 成功返回 0、失败返回非 0——成功返回 0 这一点与多数函数相反，勿记反。"
+    },
+    {
+      "id": "T7",
+      "type": "single_choice",
+      "topic": "r+ 模式语义与 fopen 路径转义",
+      "stem": "要打开 C 盘 user 子目录下名为 test.txt 的文本文件进行读/写操作，且不破坏原有内容，正确的函数调用是（ ）\nA. fopen(\"C:\\user\\test.txt\",\"r\")  B. fopen(\"C:\\user\\test.txt\",\"r+\")  C. fopen(\"C:\\\\user\\\\test.txt\",\"w\")  D. fopen(\"C:\\\\user\\\\test.txt\",\"r+\")",
+      "answer": "D",
+      "explanation": "两个考点叠加：①路径中的 \\ 在字符串里必须写成转义字符 \\\\，A、B 的 \\u 未转义；②读/写且不破坏原内容→r+（w 会清空，r 只能读）。若写 w 或 w+，原文件内容被全部删去。"
+    }
+  ],
+  "distractors": [
+    {
+      "id": "D1",
+      "type": "confusable_unit_C3",
+      "topic": "fgets 与 gets 的回车处理",
+      "stem": "判断正误并说明理由：「fgets(str, 80, fp) 从文件读入一行字符串后，字符串末尾的换行符 '\\n' 会被自动替换为字符串结束标志 '\\0'，效果与 gets(str) 完全相同。」",
+      "answer": "错误。",
+      "explanation": "gets(s)（键盘输入）把读到的回车换成 '\\0'；fgets(str,n,fp)（文件读入）在读到的前 n-1 个字符内遇到回车时会把回车符 '\n' 保留在字符串里，然后再补一个 '\\0'。两者参数格式不同、回车处理也不同——回读用 fgets 后常需手动去掉末尾 '\n'。这是 C3 字符数组单元与本单元的交界陷阱。"
+    },
+    {
+      "id": "D2",
+      "type": "confusable_unit_C5",
+      "topic": "FILE* 文件指针与 char* 字符串指针",
+      "stem": "判断正误并说明理由：「FILE *fp 与 char *p 同为指针，因此 fp++ 可以像 p++ 一样使指针逐字节后移，遍历文件中的每个字符。」",
+      "answer": "错误。",
+      "explanation": "char *p 指向字符，p++ 逐字符前进（C5 字符串指针的用法）；FILE *fp 指向的是系统定义的文件结构体（成员含缓冲区位置、读写状态等），fp 只作为 fopen/fclose/各读写函数的参数使用，不自增。文件内位置的移动由 fgetc/fgets/fread 等函数自动后移位置指针，或用 fseek/rewind 定位——动的是文件内部位置指针（一个整数值），不是 fp 本身。"
+    },
+    {
+      "id": "D3",
+      "type": "confusable_in_unit",
+      "topic": "fputs 与 puts 的换行行为",
+      "stem": "判断正误并说明理由：「fputs(\"abc\", stdout) 与 puts(\"abc\") 的输出结果完全相同，都输出 abc 并换行。」",
+      "answer": "错误。",
+      "explanation": "puts(s) 输出字符串时把结束标志 '\\0' 转换为 '\\n'，输出后自动换行；fputs(s,fp)（fp 也可以是 stdout）把字符串写入时舍去 '\\0'，不自动换行。fputs 后想要换行须自己补 fputc('\\n',stdout)。"
+    }
+  ],
+  "edge": {
+    "id": "E1",
+    "type": "read_program",
+    "topic": "w+ 清空陷阱 + fscanf 粘连边界",
+    "stem": "阅读程序，写出输出结果（假设 text.dat 之前不存在或内容任意）：\n#include <stdio.h>\nint main(void)\n{\n    FILE *fp;\n    int i, m, n;\n    fp=fopen(\"text.dat\",\"w+\");\n    for(i=1;i<5;i++)\n    {\n        fprintf(fp,\"%d\",i);\n        if(i%3==0)\n            fprintf(fp,\" \");\n    }\n    rewind(fp);\n    fscanf(fp,\"%d%d\",&m,&n);\n    printf(\"%d,%d\\n\",m,n);\n    fclose(fp);\n    return 0;\n}",
+      "answer": "123,4",
+      "explanation": "w+ 打开先清空。循环写入：i=1 写 '1'，i=2 写 '2'，i=3 写 '3' 且 i%3==0 追加一个空格，i=4 写 '4'——文件内容为 \"123 4\"。rewind 回到文件头，fscanf 按 %d%d 读：%d 自动跳过前导空白，第一个数读到 123（遇到空格停），第二个数读到 4。输出 123,4。两处陷阱叠加：w+ 清空（不是保留）+ %d 以空白为界粘连解析（写时无分隔符会粘成一个数）。"
+  }
+}

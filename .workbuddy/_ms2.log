@@ -1,0 +1,12 @@
+﻿已将数据库上下文更改为 "MySchool"。
+表 列 类型
+- - --
+成绩表 学号 int
+成绩表 课程号 int
+成绩表 成绩 decimal
+课程表 课程号 int
+课程表 课程名 char
+课程表 学分 decimal
+学生表 学号 int
+学生表 姓名 char
+学生表 年龄 int

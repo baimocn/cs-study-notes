@@ -1,0 +1,95 @@
+{
+  "unit": "D6-内置函数",
+  "source_chapter": "ch08",
+  "minimum_pass_rate": 0.8,
+  "note": "should_trigger=内置函数题（输入→返回值/NULL 处理）；decoy=相邻单元诱饵（D3 聚合分组、D7 T-SQL 变量）；edge=边界争议题",
+  "should_trigger": [
+    {
+      "id": "D6-T1",
+      "type": "fill-blank",
+      "prompt": "成绩表 score 有 5 行，其中 1 行成绩为 NULL。SELECT COUNT(*) FROM score 与 SELECT COUNT(成绩) FROM score 的返回值分别是多少？",
+      "answer": "COUNT(*)=5（数所有行，含 NULL 行）；COUNT(成绩)=4（只数非 NULL 值）",
+      "hook": "聚合怕 NULL：COUNT(*) 数行，COUNT(列) 数非空值"
+    },
+    {
+      "id": "D6-T2",
+      "type": "fill-blank",
+      "prompt": "SELECT ROUND(56.34, -1) 的返回值是____。",
+      "answer": "60。y 为负数时在小数点左侧四舍五入",
+      "hook": "ROUND 的 y 负=小数点左侧舍入"
+    },
+    {
+      "id": "D6-T3",
+      "type": "fill-blank",
+      "prompt": "SELECT CONCAT('hello', NULL, 'world') 的返回值是____。",
+      "answer": "'helloworld'。CONCAT 把 NULL 当空串替代",
+      "hook": "CONCAT 对 NULL 的特殊处理"
+    },
+    {
+      "id": "D6-T4",
+      "type": "fill-blank",
+      "prompt": "SELECT YEAR('01/15/2017')、SELECT MONTH('01/15/2017')、SELECT DAY('01/15/2017') 的返回值分别是____、____、____，返回类型都是____。",
+      "answer": "2017、1、15；返回类型都是整数 int（区别于 DATENAME 返回字符串）",
+      "hook": "YEAR/MONTH/DAY 返回 int"
+    },
+    {
+      "id": "D6-T5",
+      "type": "choice",
+      "prompt": "SELECT CEILING(-56.3) 和 SELECT FLOOR(-56.3) 的返回值分别是：A. -57 和 -56  B. -56 和 -57  C. -56 和 -56  D. -57 和 -57",
+      "answer": "B。CEILING 向大取整得 -56，FLOOR 向小取整得 -57，负数方向不反转",
+      "hook": "CEILING/FLOOR 负数方向"
+    },
+    {
+      "id": "D6-T6",
+      "type": "fill-blank",
+      "prompt": "SELECT CAST('123' AS int) + 20 的返回值是____；SELECT TRY_CONVERT(float, 'ttt') 的返回值是____。",
+      "answer": "143；NULL（TRY_CONVERT 转换失败返回 NULL 而不报错）",
+      "hook": "类型转换：CAST 拼 int；TRY_CONVERT 失败兜底 NULL"
+    },
+    {
+      "id": "D6-T7",
+      "type": "choice",
+      "prompt": "学生选课表中同一学生同一门课可能有多条记录。统计每名学生所选课程总数，应使用：A. COUNT(课程号)  B. COUNT(*)  C. COUNT(DISTINCT 课程号)  D. SUM(课程号)",
+      "answer": "C。DISTINCT 先去重再计数，对应教材例8.2",
+      "hook": "COUNT(DISTINCT 列) 去重计数"
+    },
+    {
+      "id": "D6-T8",
+      "type": "fill-blank",
+      "prompt": "SELECT PATINDEX('%tt%', 'wwttyy') 的返回值是____；在 WHERE 子句中用 CHARINDEX('雪', 姓名) 筛选姓名含'雪'字的学生，条件应写成 CHARINDEX('雪', 姓名) ____ 0。",
+      "answer": "3；> 0（CHARINDEX 找到返回位置值>0，找不到返回 0）",
+      "hook": "CHARINDEX/PATINDEX 的返回值语义"
+    }
+  ],
+  "decoy": [
+    {
+      "id": "D6-D1",
+      "decoy_unit": "D3-单表查询五子句",
+      "prompt": "查询每门课程的平均成绩，只显示平均分大于 75 分的课程，应如何写 SQL？",
+      "answer_hint": "GROUP BY 课程号 + HAVING AVG(成绩) > 75——考点是 HAVING 与 WHERE 的分工，不是函数返回值本身",
+      "expect": "no_trigger"
+    },
+    {
+      "id": "D6-D2",
+      "decoy_unit": "D3-单表查询五子句",
+      "prompt": "SELECT 学号, 姓名 FROM 学生 WHERE 系部 = '计算机系' ORDER BY 学号 DESC 这条语句执行时各子句的逻辑执行顺序是什么？",
+      "answer_hint": "FROM→WHERE→SELECT→ORDER BY——查询骨架题归 D3",
+      "expect": "no_trigger"
+    },
+    {
+      "id": "D6-D3",
+      "decoy_unit": "D7-事务与T-SQL编程",
+      "prompt": "T-SQL 中声明一个存放姓名的变量并赋值为'张斌'，正确的语句怎么写？",
+      "answer_hint": "DECLARE @name char(8)；SET @name='张斌'——变量声明赋值归 D7，不是内置函数题",
+      "expect": "no_trigger"
+    }
+  ],
+  "edge": [
+    {
+      "id": "D6-E1",
+      "prompt": "SELECT SUM(成绩) FROM 成绩表 WHERE 1=0（查询结果为空集）的返回值是多少？",
+      "answer": "NULL 而不是 0。SUM/AVG/MAX/MIN 对空集返回 NULL；只有 COUNT（尤其 COUNT(*)）对空表返回 0。此行为教材未明说，属 SQL 标准行为，作为失分点边界记录",
+      "expect": "trigger_with_caveat"
+    }
+  ]
+}

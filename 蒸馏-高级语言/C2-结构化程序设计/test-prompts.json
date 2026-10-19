@@ -1,0 +1,156 @@
+{
+  "unit": "C2-结构化程序设计",
+  "source_book": "《高级语言程序设计（2017年版）》郑岩",
+  "source_chapter": "ch04",
+  "minimum_pass_rate": 0.8,
+  "notes": "trigger 题干自包含；trig-01/04/05 源自教材练习题（程序分析3/6/5，账本题源归一化）；诱饵用于压力测试路由。",
+  "triggers": [
+    {
+      "id": "trig-01",
+      "type": "读程序写结果",
+      "stars": 2,
+      "stem": "阅读程序，写出运行结果：\n#include <stdio.h>\nint main(void)\n{\n    int a = 3, b = 2, c = 1, d;\n    switch (a = b == c + 1)\n    {\n    case 1: d = 1; break;\n    case 2: d = 2; break;\n    case 3: d = 3; break;\n    default: d = 4;\n    }\n    printf(\"%d\\n\", d);\n    return 0;\n}",
+      "answer": "1",
+      "key_points": [
+        "switch 的表达式是赋值表达式 a=b==c+1：== 优先级高于 =，先算 b==c+1 即 2==2 为真(1)，再把 1 赋给 a",
+        "switch(1) 命中 case 1 入口，执行 d=1 后遇 break 跳出",
+        "case 只作入口标号不判断，若漏 break 会穿透执行 case 2、case 3"
+      ]
+    },
+    {
+      "id": "trig-02",
+      "type": "读程序写结果",
+      "stars": 2,
+      "stem": "阅读程序，写出运行结果：\n#include <stdio.h>\nint main(void)\n{\n    int n = 5, s = 0;\n    while (n < 3)\n    {\n        s += n;\n        n++;\n    }\n    printf(\"A=%d,\", s);\n    n = 5; s = 0;\n    do\n    {\n        s += n;\n        n++;\n    } while (n < 3);\n    printf(\"B=%d\\n\", s);\n    return 0;\n}",
+      "answer": "A=0,B=5",
+      "key_points": [
+        "while 先判断后执行：n=5 时条件 5<3 一开始为假，循环体一次不执行，s 保持 0",
+        "do-while 先执行后判断：循环体先跑一次（s=5, n=6），再判 6<3 为假结束",
+        "while vs do-while 首判区别：条件初始为假时，while 跑 0 次、do-while 跑 1 次"
+      ]
+    },
+    {
+      "id": "trig-03",
+      "type": "读程序写结果-嵌套循环表格跟踪",
+      "stars": 3,
+      "stem": "阅读程序，用表格法逐行跟踪后写出全部运行结果：\n#include <stdio.h>\nint main(void)\n{\n    int i, j, s = 0;\n    for (i = 1; i <= 3; i++)\n    {\n        for (j = 1; j <= i; j++)\n        {\n            if (j % 2 == 0)\n                continue;\n            s += i * j;\n        }\n        printf(\"%d,%d\\n\", i, s);\n    }\n    printf(\"s=%d\\n\", s);\n    return 0;\n}\n要求：列出每一步的 i、j、j%2、s 及走向（continue 记 C，内层结束记止）。",
+      "answer": "1,1\n2,3\n3,15\ns=15\n跟踪表：\n步1 i=1 j=1 j%2=1 s=1（s+=1*1）→j++\n步2 i=1 j=2 内层止（j>i）→打印 1,1\n步3 i=2 j=1 s=3（s+=2*1）→j++\n步4 i=2 j=2 j%2=0 C→j++（continue 跳到表达式3）\n步5 i=2 j=3 内层止→打印 2,3\n步6 i=3 j=1 s=6（s+=3*1）→j++\n步7 i=3 j=2 C→j++\n步8 i=3 j=3 s=15（s+=3*3）→j++\n步9 i=3 j=4 内层止→打印 3,15；i=4 门槛 4<=3 为假，全停",
+      "key_points": [
+        "行高=内层层数：外层每轮下挂内层多行，每行只执行一次迭代",
+        "continue 在 for 中跳到表达式3（j++ 照常执行），不是跳过整个循环",
+        "printf 在内层循环之外、外层之内：每轮外层打印一次当时的 i 和 s",
+        "s 是全程累加不清零：1+2+3+9=15"
+      ]
+    },
+    {
+      "id": "trig-04",
+      "type": "读程序写结果",
+      "stars": 2,
+      "stem": "阅读程序，写出运行结果：\n#include <stdio.h>\nint main(void)\n{\n    int x, y = 4;\n    for (x = 1; x <= 100; x++)\n    {\n        if (y >= 30)\n            break;\n        if (y % 3 == 1)\n        {\n            y = y + 3;\n            continue;\n        }\n        y = y - 2;\n    }\n    printf(\"%d\\n\", x);\n    return 0;\n}",
+      "answer": "10",
+      "key_points": [
+        "y=4 起，每轮 4%3==1 成立走 y+3 并 continue（跳过 y-2）：y 依次 7,10,13,16,19,22,25,28,31",
+        "x=9 轮把 y 加到 31；x=10 轮开头 y>=30 成立，break 跳出，此时 x 停在 10（尚未自增到 11）",
+        "break 强制结束整个循环，x 的当前值就是输出值；若把 break 误当 continue 会得 100"
+      ]
+    },
+    {
+      "id": "trig-05",
+      "type": "读程序写结果",
+      "stars": 2,
+      "stem": "阅读程序，写出运行结果：\n#include <stdio.h>\nint main(void)\n{\n    int i = 1, s = 3;\n    do\n    {\n        s += i++;\n        if (s % 7 == 0)\n            continue;\n        else\n            ++i;\n        \n    } while (s < 15);\n    printf(\"%d\\n\", i);\n    return 0;\n}",
+      "answer": "8",
+      "key_points": [
+        "s+=i++ 是后置自增：先用旧 i 累加，再 i 自增 1",
+        "轮1: s=4,i=2→else ++i→i=3；轮2: s=7,i=4，7%7==0→continue 跳向 while 判断；轮3: s=11,i=5→++i→6；轮4: s=17,i=7→++i→8",
+        "while(17<15) 为假退出，输出 i=8",
+        "do-while 中 continue 跳到尾部条件判断；s+=i++ 的求值次序属 C1 与 C2 交界，本题考的是循环走向"
+      ]
+    },
+    {
+      "id": "trig-06",
+      "type": "程序填空-补 if 条件",
+      "stars": 2,
+      "stem": "①判断输入的年份是否闰年（能被 4 整除但不能被 100 整除，或能被 400 整除）：\nif (year % 400 == 0) yes = 1;\nelse if (【空1】) yes = 1;\n\n②判断输入的整数能否被 11 和 13 同时整除，能则输出 yes：\nif (【空2】)\n    printf(\"yes\\n\");\nelse\n    printf(\"no\\n\");\n写出空1、空2 处应填的表达式。",
+      "answer": "空1：year%4==0 && year%100!=0\n空2：num%11==0 && num%13==0",
+      "key_points": [
+        "闰年条件拆分：400 整除已由前一分支处理，else if 只需补 4 整除且不 100 整除",
+        "同时整除 = 两个余数同时为 0，用 && 连接；写成 || 是高频错答",
+        "取余运算符 % 的操作数必须是整型"
+      ]
+    },
+    {
+      "id": "trig-07",
+      "type": "程序填空-补循环体",
+      "stars": 2,
+      "stem": "程序计算 1!+2!+…+n!（n 由键盘输入），补全 for 循环体：\nlong fact = 1, sum = 0;\nint i, n;\nscanf(\"%d\", &n);\nfor (i = 1; i <= n; i++)\n{\n    【空1】        /* 计算当前 i 的阶乘，累乘到 fact */\n    【空2】        /* 把当前阶乘累加到 sum */\n}\nprintf(\"%ld\\n\", sum);",
+      "answer": "空1：fact *= i;（即 fact=fact*i;）\n空2：sum += fact;（即 sum=sum+fact;）",
+      "key_points": [
+        "累乘器 fact 初值必须为 1（乘法单位元），累加器 sum 初值必须为 0",
+        "阶乘用滚动累乘 fact*=i，不必每轮重算内层循环",
+        "顺序不能颠倒：先把 fact 滚到 i!，再累加；若先加后乘会多算一项"
+      ]
+    },
+    {
+      "id": "trig-08",
+      "type": "改错-break位置错",
+      "stars": 2,
+      "stem": "以下程序想根据成绩等级字符输出分数段。输入 B 后的运行结果与预期不符，指出错误并改正：\nchar grade;\nscanf(\"%c\", &grade);\nswitch (grade)\n{\ncase 'A': printf(\"85~100\\n\");\ncase 'B': printf(\"70~84\\n\");\ncase 'C': printf(\"60~69\\n\");\ncase 'D': printf(\"<60\\n\");\ndefault:  printf(\"error\\n\");\n}",
+      "answer": "输入 B 实际输出四行：70~84 / 60~69 / <60 / error。错误：各 case 分支末尾缺少 break 语句，case 只作入口标号不做条件判断，命中 case 'B' 后一路穿透执行到 switch 结束。改正：每个 printf 之后各加一条 break;（最后一个 default 后可省）。",
+      "key_points": [
+        "case 常量表达式仅起标号作用，系统找到入口后不再判号",
+        "漏 break 即穿堂风：从入口执行到 switch 结束前的所有语句",
+        "default 位置与结果无关，但穿透时位于中间的 default 同样会被穿过"
+      ]
+    },
+    {
+      "id": "trig-09",
+      "type": "改错-分号位置错",
+      "stars": 2,
+      "stem": "指出以下两个程序段的错误并改正：\n①（想输出 1~10）\nint i = 1;\nwhile (i <= 10);\n{\n    printf(\"%d \", i);\n    i++;\n}\n\n②（想反复输入直到值为 0）\nint n;\ndo\n{\n    scanf(\"%d\", &n);\n} while (n != 0)   /* 此处之后程序无法通过编译 */",
+      "answer": "①while(条件) 后多了分号：循环体变成空语句，i 永远是 1，条件恒真 → 死循环，{} 里的两条语句只会在死循环之外（实际永远执行不到）。改正：删去 while (i <= 10) 后的分号。②do-while 的 while(表达式) 后缺少分号，do-while 语句以分号结尾，改正：while (n != 0);",
+      "key_points": [
+        "while 头后误加分号 → 空语句循环体 → 死循环（教材例4-27 说明原话考点）",
+        "do-while 尾部分号不能省：while(表达式); 是语法要求，漏了编译错",
+        "对比记忆：for 头两个分号必须有、不能多；while 头后不能有；do-while 尾必须有"
+      ]
+    }
+  ],
+  "decoys": [
+    {
+      "id": "decoy-01",
+      "looks_like": "循环条件求值（诱向 C2）",
+      "correct_unit": "C1 数据类型与表达式",
+      "stem": "设 int a = 2, b = 3, c; 执行 c = a++ > 1 || b-- < 3; 后，写出 c、a、b 的值。",
+      "answer": "c=1, a=3, b=3",
+      "why_decoy": "题面出现类似条件的表达式，易误路由到 C2 循环；实际不进入任何控制结构，考 || 短路求值与后置自增：a++>1 用旧值 2 比较为真，|| 短路右侧 b-- 不执行，b 不变。纯表达式求值归 C1。"
+    },
+    {
+      "id": "decoy-02",
+      "looks_like": "for 循环跟踪求和（诱向 C2）",
+      "correct_unit": "C3 数组",
+      "stem": "设 int a[5] = {1, 2, 3, 4, 5}; int i, s = 0; 执行 for (i = 0; i <= 5; i++) s += a[i]; 后，s 的值能否确定为 15？为什么？",
+      "answer": "不能。循环写法本身没错，但 i=5 时访问 a[5] 越界：数组 a 的合法下标是 0~4，a[5] 不是数组元素，其值不确定，因此 s 的最终值不确定（可能包含越界读到的任意值）。",
+      "why_decoy": "循环骨架是 C2 的，但杀伤点在数组下标边界（0 起、最大下标 N-1），归 C3。C2 视角只答 15 会掉坑。"
+    },
+    {
+      "id": "decoy-03",
+      "looks_like": "累乘循环（诱向 C2 的 for 阶乘）",
+      "correct_unit": "C4 函数",
+      "stem": "阅读程序写出 f(4) 的返回值：\nlong f(int n)\n{\n    if (n == 1)\n        return 1;\n    return n * f(n - 1);\n}",
+      "answer": "24",
+      "why_decoy": "阶乘在 C2 有 for 累乘版（例4-31），题面易误路由 C2；本程序无循环，靠递归出口 n==1 与自调用 f(n-1) 展开 4*3*2*1=24，归 C4。边界记忆：递归出口≈循环判停条件，但结构归属按语法形态判。"
+    }
+  ],
+  "edge": {
+    "id": "edge-01",
+    "type": "边界输入读程序",
+    "stem": "阅读程序（教材例4-18 改编）：\nfloat x, y;\nscanf(\"%f%f\", &x, &y);\nif (x > 0)\n    if (y > 0) printf(\"The point is in 1st quadrant.\\n\");\n    else       printf(\"The point is in 4th quadrant.\\n\");\nelse\n    if (y > 0) printf(\"The point is in 2nd quadrant.\\n\");\n    else       printf(\"The point is in 3rd quadrant.\\n\");\n输入 x=0, y=5 时输出什么？该结果是否符合象限的数学定义？说明原因。",
+      "answer": "输出 The point is in 2nd quadrant.。不符合数学定义：坐标轴上的点 (0,5) 不属于任何象限。原因是程序只按 x>0 与 x<=0 两大分支划分，x=0 落入 else 分支后再按 y>0 判为第 2 象限；程序未处理 x==0 或 y==0 的退化情形。读程序题必须按分支走向作答，不能按数学定义改答案。",
+    "key_points": [
+      "else 与外层 if 配对（内层 if-else 完整占用外层 if 的真分支）",
+      "退化输入（x=0/y=0）暴露程序边界：分支结构只覆盖了命题人写出的情形",
+      "读程序题的铁律：跟着分支走，不跟着常识走"
+    ]
+  }
+}

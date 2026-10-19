@@ -1,0 +1,28 @@
+{
+    "C_Cpp.errorSquiggles": "disabled",
+    "mssql.connections": [
+        {
+            "server": "localhost",
+            "database": "QuizDB",
+            "authenticationType": "Integrated",
+            "trustServerCertificate": true,
+            "encrypt": "Optional",
+            "profileName": "QuizDB (localhost)",
+            "groupId": "ROOT",
+            "id": "090339b6-f8d8-4e9f-ab36-d840ac4a0bbe",
+            "profileSource": 0,
+            "password": ""
+        }
+    ],
+    "mssql.connectionGroups": [
+        {
+            "name": "ROOT",
+            "id": "ROOT"
+        }
+    ],
+    "mssql.enableQueryHistory": true,
+    "mssql.intelliSense.enableIntelliSense": true,
+    "files.associations": {
+        "*.sql": "sql"
+    }
+}

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>操作系统 · 简答背诵</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#fafbfc;font-family:"Microsoft YaHei",sans-serif}
+  #bar{position:fixed;top:12px;right:16px;z-index:10;display:flex;gap:8px}
+  #bar button{border:1px solid #c8ccd0;background:#fff;border-radius:6px;padding:6px 12px;font-size:13px;cursor:pointer;color:#333}
+  #bar button:hover{background:#eef2f6}
+  #hint{position:fixed;bottom:12px;left:16px;font-size:12px;color:#98a2ad;z-index:10}
+  svg{cursor:grab;display:block;width:100vw;height:100vh}
+  svg.drag{cursor:grabbing}
+  text{user-select:none}
+</style>
+</head>
+<body>
+<div id="bar">
+  <button onclick="fitAll()">适应窗口</button>
+  <button onclick="setAll(true)">答案全显</button>
+  <button onclick="setAll(false)">默背模式</button>
+</div>
+<div id="hint">滚轮缩放 · 拖拽平移 · 点题干展开对答案 · 默背模式=只露题干</div>
+<svg id="svg"></svg>
+<script>
+const DATA = {"t": "操作系统\n简答默背", "c": [
+  {"t": "1. 操作系统四大基本功能（处存设文）", "c": [
+    {"t": "处理机管理：进程的创建/调度/通信/死锁处理", "c": []},
+    {"t": "存储器管理：内存分配与回收——分页/分段/虚拟存储器", "c": []},
+    {"t": "设备管理：外部设备的分配、驱动与缓冲", "c": []},
+    {"t": "文件管理：文件的存储组织、目录与权限", "c": []}]},
+  {"t": "2. 进程三状态及转换", "c": [
+    {"t": "就绪：万事俱备，〔只缺CPU〕", "c": []},
+    {"t": "运行：拿到CPU正在执行", "c": [
+      {"t": "时间片到 → 回就绪", "c": []},
+      {"t": "等事件 → 阻塞（主动）", "c": []}]},
+    {"t": "阻塞：缺事件正在等，〔缺的不是CPU〕", "c": [
+      {"t": "事件来到 → 先进就绪，不能直接抢CPU", "c": []}]}]},
+  {"t": "3. 进程 vs 线程", "c": [
+    {"t": "单位：进程=资源分配单位；线程=CPU调度单位", "c": []},
+    {"t": "开销：进程重（切地址空间）；线程轻（只换栈和寄存器）", "c": []},
+    {"t": "资源：进程独立拥有；线程共享所属进程的资源", "c": []},
+    {"t": "通信：进程要走正规渠道（管道/消息/共享内存）；线程天然共享，易通信也易冲突", "c": []}]},
+  {"t": "4. 分页 vs 分段", "c": [
+    {"t": "分页：固定大小（如4KB），物理单位，一维线性地址", "c": []},
+    {"t": "分段：不固定（按逻辑模块），逻辑单位，二维地址（段号+段内偏移）", "c": []},
+    {"t": "共同：都为离散分配；差异核心=按固定物理 vs 按逻辑需求", "c": []}]},
+  {"t": "5. 虚拟存储器（概念+实现）", "c": [
+    {"t": "概念：只装部分程序即可运行，逻辑容量远大于物理内存", "c": []},
+    {"t": "实现基础：局部性原理（时间/空间）+ 内存外存结合", "c": []},
+    {"t": "支撑动作：请求调入 + 页面置换", "c": [
+      {"t": "FIFO：进得最早先走", "c": []},
+      {"t": "LRU：最久未用先走", "c": []},
+      {"t": "OPT：未来最久不用先走（理论基准）", "c": []}]}]},
+  {"t": "6. 死锁四条件 + 处理策略", "c": [
+    {"t": "四条件（同时满足才死锁）：互斥 / 占有并等待 / 不可剥夺 / 循环等待", "c": [
+      {"t": "钩子：独占、不放、不可抢、兜圈子", "c": []}]},
+    {"t": "预防：从根上破坏某条件（如一次性申请全部资源），代价大", "c": []},
+    {"t": "避免：银行家算法动态检查安全状态", "c": []},
+    {"t": "检测+解除：事后抢救（剥夺/撤销/回退）", "c": []},
+    {"t": "鸵鸟策略：多数通用OS的选择", "c": []}]},
+  {"t": "7. 调度算法 FCFS / SJF / HRRN", "c": [
+    {"t": "FCFS 先来先服务：公平、无饥饿，〔但平均周转长，连队效应〕", "c": []},
+    {"t": "SJF 短作业优先：平均周转最短，〔长作业可能饿死〕", "c": []},
+    {"t": "HRRN 高响应比优先：响应比R = 1 + 等待/服务", "c": [
+      {"t": "短作业分母小→分高；长作业等得久分子涨→不饿死", "c": []},
+      {"t": "代价：每次调度全场算一遍R", "c": []}]},
+    {"t": "指标：周转=完成−到达；带权=周转/服务；T看效率、W看公平", "c": []}]},
+  {"t": "8. 冯·诺依曼结构五特点（交叉必背）", "c": [
+    {"t": "存储程序：程序和数据同存一个存储器", "c": []},
+    {"t": "以运算器为中心", "c": []},
+    {"t": "指令和数据用二进制表示，由操作码+地址码组成", "c": []},
+    {"t": "按地址顺序执行", "c": [
+      {"t": "钩子：存储程序 / 二进制 / 操作码地址码 / 顺序 / 运算器", "c": []}]}]}
+]};
+
+const svg = document.getElementById('svg');
+const NS = 'http://www.w3.org/2000/svg';
+const GAPX = 70, GAPY = 14, PADX = 12, PADY = 8, MAXCHARS = 24;
+const COLLAPSE_DEPTH = 2; // 默背模式：depth>=2 折叠，只露题干
+const COLORS = ['#1f77b4','#d62728','#2ca02c','#9467bd','#ff7f0e','#8c564b','#17becf','#bcbd22','#e377c2','#7f7f7f'];
+
+function wrap(t){
+  const lines = [];
+  for (const seg of t.split('\n')){
+    let cur = '';
+    for (const ch of seg){
+      cur += ch;
+      const w = [...cur].reduce((a,c)=>a+(c.charCodeAt(0)>255?1:0.55),0);
+      if (w >= MAXCHARS){ lines.push(cur); cur=''; }
+    }
+    lines.push(cur);
+  }
+  return lines.slice(0,6);
+}
+
+function measure(node, depth){
+  const lines = wrap(node.t);
+  node._lines = lines;
+  node._fs = depth===0?22:depth===1?17:13.5;
+  node._w = Math.max(...lines.map(l=>[...l].reduce((a,c)=>a+(c.charCodeAt(0)>255?node._fs:node._fs*0.55),0))) + PADX*2;
+  node._h = lines.length*(node._fs+4) + PADY*2 - 4;
+}
+
+function calcSub(node, depth){
+  measure(node, depth);
+  if (node._collapsed === undefined) node._collapsed = depth >= COLLAPSE_DEPTH;
+  if (!node.c || !node.c.length || node._collapsed){ node._sub = node._h; }
+  else {
+    let sum = (node.c.length-1)*GAPY;
+    for (const ch of node.c) sum += calcSub(ch, depth+1);
+    node._sub = Math.max(node._h, sum);
+  }
+  return node._sub;
+}
+calcSub(DATA, 0);
+
+function assign(node, depth, x, top, colorIdx){
+  node._x = x;
+  node._depth = depth;
+  if (depth === 0) node._color = '#24292e';
+  else if (depth === 1) node._color = COLORS[colorIdx % COLORS.length];
+  else node._color = node._pcolor || COLORS[colorIdx % COLORS.length];
+  node._pcolor = node._color;
+  const cy = top + node._sub/2;
+  node._y = cy - node._h/2;
+  if (node.c && node.c.length && !node._collapsed){
+    let y = top;
+    node.c.forEach((ch, i) => {
+      ch._parent = node;
+      assign(ch, depth+1, x + node._w + GAPX, y, depth===0 ? i : colorIdx);
+      y += ch._sub + GAPY;
+    });
+  }
+}
+assign(DATA, 0, 0, 0, 0);
+
+function visible(node, out){
+  out.push(node);
+  if (node.c && node.c.length && !node._collapsed)
+    for (const ch of node.c) visible(ch, out);
+  return out;
+}
+
+function render(){
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  const g = document.createElementNS(NS,'g');
+  const shown = visible(DATA, []);
+  for (const n of shown){
+    if (n._parent && n._parent._x !== undefined){
+      const p = n._parent;
+      const x1 = p._x + p._w, y1 = p._y + p._h/2;
+      const x2 = n._x, y2 = n._y + n._h/2;
+      const mx = (x1+x2)/2;
+      const path = document.createElementNS(NS,'path');
+      path.setAttribute('d', `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`);
+      path.setAttribute('fill','none');
+      path.setAttribute('stroke', n._pcolor || '#bbb');
+      path.setAttribute('stroke-width','1.6');
+      path.setAttribute('opacity','0.55');
+      g.appendChild(path);
+    }
+  }
+  for (const n of shown){
+    const grp = document.createElementNS(NS,'g');
+    const rect = document.createElementNS(NS,'rect');
+    rect.setAttribute('x', n._x); rect.setAttribute('y', n._y);
+    rect.setAttribute('width', n._w); rect.setAttribute('height', n._h);
+    rect.setAttribute('rx', 8);
+    rect.setAttribute('fill', n._depth===0 ? '#24292e' : '#ffffff');
+    rect.setAttribute('stroke', n._depth<=1 ? n._color : '#d5dae0');
+    rect.setAttribute('stroke-width', n._depth<=1 ? 2 : 1.2);
+    rect.style.filter = 'drop-shadow(0 1px 2px rgba(0,0,0,0.08))';
+    grp.appendChild(rect);
+    const text = document.createElementNS(NS,'text');
+    text.setAttribute('x', n._x + PADX);
+    text.setAttribute('y', n._y + PADY + n._fs);
+    text.setAttribute('font-size', n._fs);
+    text.setAttribute('fill', n._depth===0 ? '#fff' : '#2b3137');
+    if (n._depth===1) text.setAttribute('font-weight','bold');
+    n._lines.forEach((l,i)=>{
+      const ts = document.createElementNS(NS,'tspan');
+      ts.setAttribute('x', n._x + PADX);
+      if (i>0) ts.setAttribute('dy', n._fs+4);
+      ts.textContent = l;
+      text.appendChild(ts);
+    });
+    grp.appendChild(text);
+    if (n.c && n.c.length){
+      const dot = document.createElementNS(NS,'circle');
+      const hasHidden = n._collapsed;
+      dot.setAttribute('cx', n._x + n._w + 4);
+      dot.setAttribute('cy', n._y + n._h/2);
+      dot.setAttribute('r', hasHidden ? 8 : 3.5);
+      dot.setAttribute('fill', hasHidden ? (n._pcolor||n._color) : '#c3cad2');
+      if (hasHidden){
+        const cnt = document.createElementNS(NS,'text');
+        cnt.setAttribute('x', n._x + n._w + 4);
+        cnt.setAttribute('y', n._y + n._h/2 + 3.5);
+        cnt.setAttribute('font-size','9');
+        cnt.setAttribute('fill','#fff');
+        cnt.setAttribute('text-anchor','middle');
+        cnt.textContent = countDesc(n);
+        grp.appendChild(cnt);
+      }
+      grp.appendChild(dot);
+      grp.style.cursor = 'pointer';
+      grp.addEventListener('click', e => {
+        e.stopPropagation();
+        n._collapsed = !n._collapsed;
+        relayout();
+      });
+    }
+    g.appendChild(grp);
+  }
+  svg.appendChild(g);
+  applyTransform();
+}
+
+function countDesc(n){
+  let c = 0;
+  (function walk(x){ if(x._collapsed){ return; } for(const ch of (x.c||[])){ c++; walk(ch);} })(n);
+  return c > 99 ? '99+' : c;
+}
+
+function relayout(){
+  DATA._collapsed = false;
+  nodes = [];
+  (function reset(n){ n._sub = undefined; (n.c||[]).forEach(reset); })(DATA);
+  calcSub(DATA, 0);
+  assign(DATA, 0, 0, 0, 0);
+  render();
+}
+
+// ---- pan & zoom ----
+let tx = 60, ty = 60, scale = 1;
+function applyTransform(){
+  const g = svg.firstChild;
+  if (g) g.setAttribute('transform', `translate(${tx},${ty}) scale(${scale})`);
+}
+svg.addEventListener('wheel', e => {
+  e.preventDefault();
+  const k = e.deltaY < 0 ? 1.15 : 1/1.15;
+  const rect = svg.getBoundingClientRect();
+  const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+  tx = cx - (cx - tx) * k;
+  ty = cy - (cy - ty) * k;
+  scale *= k;
+  applyTransform();
+}, {passive:false});
+let dragging = false, lx=0, ly=0;
+svg.addEventListener('mousedown', e => { dragging = true; lx=e.clientX; ly=e.clientY; svg.classList.add('drag'); });
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  tx += e.clientX - lx; ty += e.clientY - ly; lx=e.clientX; ly=e.clientY;
+  applyTransform();
+});
+window.addEventListener('mouseup', () => { dragging = false; svg.classList.remove('drag'); });
+
+function fit(){
+  relayout();
+  const bbox = g0bbox();
+  const W = window.innerWidth;
+  scale = Math.min(W/bbox.w, 1.1) * 0.95;
+  if (scale < 0.5) scale = 0.5;
+  tx = (W - bbox.w*scale)/2 - bbox.x*scale;
+  if (tx > 40) tx = 40;
+  ty = 24;
+  applyTransform();
+}
+function fitAll(){
+  relayout();
+  const bbox = g0bbox();
+  const W = window.innerWidth, H = window.innerHeight;
+  scale = Math.min(W/bbox.w, H/bbox.h, 1.1) * 0.95;
+  tx = (W - bbox.w*scale)/2 - bbox.x*scale;
+  ty = (H - bbox.h*scale)/2 - bbox.y*scale;
+  applyTransform();
+}
+function g0bbox(){
+  const shown = visible(DATA, []);
+  let minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
+  for (const n of shown){
+    minX = Math.min(minX, n._x); minY = Math.min(minY, n._y);
+    maxX = Math.max(maxX, n._x+n._w); maxY = Math.max(maxY, n._y+n._h);
+  }
+  return {x:minX,y:minY,w:maxX-minX,h:maxY-minY};
+}
+function setAll(open){
+  (function walk(n){ if(n._depth>0) n._collapsed = !open; (n.c||[]).forEach(walk); })(DATA);
+  relayout();
+  if(open) fitAll(); else fit();
+}
+window.addEventListener('resize', fit);
+render(); fit();
+</script>
+</body>
+</html>
